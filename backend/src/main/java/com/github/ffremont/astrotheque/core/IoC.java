@@ -11,6 +11,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class IoC {
     Map<String, Object> beans = new ConcurrentHashMap<>();
 
+    public void load(Class<?>... classes){
+        for(Class<?> aClass : classes){
+            get(aClass);
+        }
+    }
+
     public void started(){
         beans.values().forEach(bean -> {
             if(bean.getClass().isAssignableFrom(StartupListener.class)){

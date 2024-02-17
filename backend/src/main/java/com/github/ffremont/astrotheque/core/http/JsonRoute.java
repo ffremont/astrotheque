@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 
 import static java.util.Objects.isNull;
 
-public class JsonRoute implements Predicate<HttpExchange>, Route {
+public class JsonRoute implements  Route {
 
     private static final ObjectMapper JSON = new  ObjectMapper();
 
@@ -32,7 +32,20 @@ public class JsonRoute implements Predicate<HttpExchange>, Route {
                 exchange.getRequestURI().getPath().endsWith(path);
     }
 
-    public static enum Method{
+    public static JsonRoute get(String path, Function<HttpExchange, Object> jsonHandler){
+        return new JsonRoute(Method.GET, path, jsonHandler);
+    }
+    public static JsonRoute post(String path, Function<HttpExchange, Object> jsonHandler){
+        return new JsonRoute(Method.POST, path, jsonHandler);
+    }
+    public static JsonRoute put(String path, Function<HttpExchange, Object> jsonHandler){
+        return new JsonRoute(Method.PUT, path, jsonHandler);
+    }
+    public static JsonRoute delete(String path, Function<HttpExchange, Object> jsonHandler){
+        return new JsonRoute(Method.DELETE, path, jsonHandler);
+    }
+
+    public enum Method{
         GET, POST, PUT, DELETE;
     }
 
@@ -57,14 +70,5 @@ public class JsonRoute implements Predicate<HttpExchange>, Route {
         }
     }
 
-
-    public static HttpHandler on(String path, Method method, Function<HttpExchange, Object> jsonHandler){
-        return (HttpExchange exchange) -> {
-            if(exchange.getRequestMethod().equalsIgnoreCase(method.name()) &&
-                    exchange.getRequestURI().getPath().endsWith(path)){
-
-            }
-        };
-    }
 
 }
