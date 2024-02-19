@@ -1,3 +1,6 @@
-/backend/target/
+target
 .idea
 .DS_Store
+node_modules
+dist
+node
