@@ -16,6 +16,7 @@ public class Picture implements Comparable<Picture> {
     String id;
     String observationId;
     PictureState state;
+    LocalDateTime imported;
     String name;
 
     MoonPhase moonPhase;

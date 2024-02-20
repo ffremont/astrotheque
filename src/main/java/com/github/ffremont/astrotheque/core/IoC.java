@@ -3,7 +3,6 @@ package com.github.ffremont.astrotheque.core;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,33 +10,36 @@ import java.util.concurrent.ConcurrentHashMap;
 public class IoC {
     Map<String, Object> beans = new ConcurrentHashMap<>();
 
-    public void load(Class<?>... classes){
-        for(Class<?> aClass : classes){
+    public void load(Class<?>... classes) {
+        for (Class<?> aClass : classes) {
             get(aClass);
         }
+
+        this.started();
     }
 
-    public void started(){
+    private void started() {
         beans.values().forEach(bean -> {
-            if(bean.getClass().isAssignableFrom(StartupListener.class)){
-                ((StartupListener)bean).onStartup(this);
+            if (bean.getClass().isAssignableFrom(StartupListener.class)) {
+                ((StartupListener) bean).onStartup(this);
             }
         });
     }
 
-    public <T> T get(Class<T> type){
+    public <T> T get(Class<T> type) {
         var key = type.getCanonicalName();
-        if(!beans.containsKey(key)){
+        if (!beans.containsKey(key)) {
             try {
                 beans.putIfAbsent(key, type.getConstructor(IoC.class).newInstance(this));
-            } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
+                     InvocationTargetException e) {
                 try {
                     beans.putIfAbsent(key, type.getConstructor().newInstance());
                 } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
                          InvocationTargetException ex) {
-                    log.error("No constructor for {}", type.getSimpleName(),ex);
+                    log.error("No constructor for {}", type.getSimpleName(), ex);
 
-                    throw new RuntimeException("No constructor for " + type.getSimpleName(),ex);
+                    throw new RuntimeException("No constructor for " + type.getSimpleName(), ex);
                 }
             }
         }
