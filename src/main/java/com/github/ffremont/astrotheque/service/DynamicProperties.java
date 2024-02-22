@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
+import static java.util.function.Predicate.not;
+
 @Getter
 public class DynamicProperties {
     private final Path dataDir;
@@ -16,7 +18,7 @@ public class DynamicProperties {
     private final String astrometryNovaApikey;
 
     public DynamicProperties() {
-        this.dataDir = Paths.get(System.getenv("DATA_DIR"));
+        this.dataDir = Paths.get(Optional.ofNullable(System.getenv("DATA_DIR")).filter(not(String::isEmpty)).orElse("./"));
         this.adminLogin = Optional.ofNullable(System.getenv("ADMIN_LOGIN")).orElse("admin");
         this.adminPwd = Optional.ofNullable(System.getenv("ADMIN_PWD")).orElse("admin");
         this.astrometryNovaBaseUrl = Optional.ofNullable(System.getenv("ASTROMETRY_NOVA_BASEURL")).orElse("https://nova.astrometry.net");

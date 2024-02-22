@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.core.StartupListener;
 import com.github.ffremont.astrotheque.service.DynamicProperties;
+import com.github.ffremont.astrotheque.service.model.Account;
 import com.github.ffremont.astrotheque.service.model.Belong;
 import com.github.ffremont.astrotheque.service.model.Picture;
 import com.github.ffremont.astrotheque.service.model.PictureState;
@@ -56,12 +57,12 @@ public class PictureDAO implements StartupListener {
     @Override
     public void onStartup(IoC ioc) {
         try {
-            List<String> accounts = ioc.get(AccountDao.class).getAccounts();
+            List<Account> accounts = ioc.get(AccountDao.class).getAccounts();
             Path dataDir = ioc.get(DynamicProperties.class).getDataDir();
             if (!dataDir.toFile().exists()) Files.createDirectories(dataDir);
 
             Files.list(dataDir)
-                    .filter(path -> accounts.contains(path.toFile().getName()))
+                    .filter(path -> accounts.stream().map(Account::name).toList().contains(path.toFile().getName()))
                     .forEach(accountDataPath -> {
                         String owner = accountDataPath.toFile().getName();
                         try {

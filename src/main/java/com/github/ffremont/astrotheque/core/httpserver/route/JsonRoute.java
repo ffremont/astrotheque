@@ -50,10 +50,10 @@ public class JsonRoute implements Route {
 
 
     public void handle(HttpExchange exchange) {
-        try (exchange) {
+        try {
             var result = jsonHandler.apply(WrapperFactory.builder().json(JSON).bodyClass(bodyClass).pattern(pattern).build().apply(exchange));
             if (isNull(result)) {
-                exchange.sendResponseHeaders(204, 0);
+                exchange.sendResponseHeaders(204, -1);
             } else {
                 String jsonResponse = JSON.writeValueAsString(result);
 

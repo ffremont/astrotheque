@@ -7,6 +7,8 @@ import com.github.ffremont.astrotheque.core.httpserver.route.StreamingRoute;
 import com.github.ffremont.astrotheque.core.security.AstroAuthenticator;
 import com.github.ffremont.astrotheque.dao.DeepSkyCatalogDAO;
 import com.github.ffremont.astrotheque.dao.PictureDAO;
+import com.github.ffremont.astrotheque.service.AccountService;
+import com.github.ffremont.astrotheque.service.DynamicProperties;
 import com.github.ffremont.astrotheque.service.model.Picture;
 import com.github.ffremont.astrotheque.web.ImageResource;
 import com.github.ffremont.astrotheque.web.LoginResource;
@@ -45,7 +47,7 @@ public class AstrothequeApplication {
         ));
         final var ioc = new IoC();
 
-        ioc.load(DeepSkyCatalogDAO.class, PictureDAO.class);
+        ioc.load(DynamicProperties.class, DeepSkyCatalogDAO.class, PictureDAO.class, AccountService.class);
         var pictureRessource = ioc.get(PictureResource.class);
         var imageResource = ioc.get(ImageResource.class);
         var loginResource = ioc.get(LoginResource.class);

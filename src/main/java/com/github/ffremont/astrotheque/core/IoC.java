@@ -20,7 +20,7 @@ public class IoC {
 
     private void started() {
         beans.values().forEach(bean -> {
-            if (bean.getClass().isAssignableFrom(StartupListener.class)) {
+            if (StartupListener.class.isAssignableFrom(bean.getClass())) {
                 ((StartupListener) bean).onStartup(this);
             }
         });
@@ -37,8 +37,6 @@ public class IoC {
                     beans.putIfAbsent(key, type.getConstructor().newInstance());
                 } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
                          InvocationTargetException ex) {
-                    log.error("No constructor for {}", type.getSimpleName(), ex);
-
                     throw new RuntimeException("No constructor for " + type.getSimpleName(), ex);
                 }
             }

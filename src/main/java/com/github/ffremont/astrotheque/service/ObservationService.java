@@ -1,8 +1,6 @@
 package com.github.ffremont.astrotheque.service;
 
 import com.github.ffremont.astrotheque.core.IoC;
-import com.github.ffremont.astrotheque.core.security.SecurityContextHolder;
-import com.github.ffremont.astrotheque.core.security.User;
 import com.github.ffremont.astrotheque.dao.PictureDAO;
 import com.github.ffremont.astrotheque.service.model.FitData;
 import com.github.ffremont.astrotheque.service.utils.FitUtils;
@@ -39,8 +37,7 @@ public class ObservationService {
     }
 
 
-    public Observation importObservation(Observation observation) {
-        final User user = SecurityContextHolder.getUser();
+    public Observation importObservation(String accountName, Observation observation) {
         final var obsId = UUID.randomUUID().toString();
 
         var fits = Arrays.asList(observation.getTargets().toLowerCase().split(","))
@@ -60,7 +57,7 @@ public class ObservationService {
                                         throw new RuntimeException(e);
                                     }
                                 })
-                                .filter(fit -> !pictureDAO.has(user.sub(), fit.getHash()))
+                                .filter(fit -> !pictureDAO.has(accountName, fit.getHash()))
                                 .max(Comparator.comparing(FitData::getStackCnt));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
@@ -70,7 +67,7 @@ public class ObservationService {
         var newObs = observation.toBuilder().id(obsId).fits(fits.stream().map(FitData::getId).toList()).build();
 
         // persist ids
-        pictureDAO.allocate(user.sub(), fits.stream().map(f -> f.getId()).toList(), newObs);
+        pictureDAO.allocate(accountName, fits.stream().map(f -> f.getId()).toList(), newObs);
 
         //background
         FIT_IMPORT_THREAD_POOL.submit(new FitImporter(
@@ -78,7 +75,7 @@ public class ObservationService {
                 observation,
                 fits,
                 ioc.get(DynamicProperties.class).getAstrometryNovaApikey(),
-                user.sub()));
+                accountName));
 
         return newObs;
     }

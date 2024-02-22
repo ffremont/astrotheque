@@ -1,6 +1,7 @@
 package com.github.ffremont.astrotheque.dao;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.core.StartupListener;
@@ -17,7 +18,8 @@ public class DeepSkyCatalogDAO implements StartupListener {
     final static String DSO_FILENAME = "deep-sky-objects.json";
     final static String CONSTS_FILENAME = "constellations.json";
 
-    private final static ObjectMapper JSON = new ObjectMapper();
+    private final static ObjectMapper JSON = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     List<DsoEntry> dsoEntries;
     List<ConstellationData> constellations;

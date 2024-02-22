@@ -1,6 +1,8 @@
 package com.github.ffremont.astrotheque.web;
 
+import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.core.httpserver.route.HttpExchangeWrapper;
+import com.github.ffremont.astrotheque.service.PictureService;
 import com.github.ffremont.astrotheque.service.model.Picture;
 import com.github.ffremont.astrotheque.web.model.WebTag;
 
@@ -9,9 +11,12 @@ import java.util.List;
 
 public class PictureResource {
 
-    public String get(HttpExchangeWrapper ex) {
-        return "picutr";
+    private final PictureService service;
+
+    public PictureResource(IoC ioC) {
+        this.service = ioC.get(PictureService.class);
     }
+
 
     /**
      * Tous les tags
@@ -22,18 +27,30 @@ public class PictureResource {
         return null;
     }
 
+    /**
+     * @param exchangeWrapper
+     * @return
+     */
     public List<Picture> all(HttpExchangeWrapper exchangeWrapper) {
-        return null;
+        return service.getAll(exchangeWrapper.httpExchange().getPrincipal().getUsername());
     }
 
-    public Picture delete(HttpExchangeWrapper wrapper) {
-        String id = wrapper.pathParams().stream().findFirst().orElseThrow();
-        return null;
+    /**
+     * @param exchangeWrapper
+     * @return
+     */
+    public Picture delete(HttpExchangeWrapper exchangeWrapper) {
+        String id = exchangeWrapper.pathParams().stream().findFirst().orElseThrow();
+        return service.delete(exchangeWrapper.httpExchange().getPrincipal().getUsername(), id);
     }
 
-    public Picture update(HttpExchangeWrapper wrapper) {
-        Picture body = (Picture) wrapper.body();
-        return null;
+    /**
+     * @param exchangeWrapper
+     * @return
+     */
+    public Picture update(HttpExchangeWrapper exchangeWrapper) {
+        Picture body = (Picture) exchangeWrapper.body();
+        return service.update(exchangeWrapper.httpExchange().getPrincipal().getUsername(), body);
     }
 
 
