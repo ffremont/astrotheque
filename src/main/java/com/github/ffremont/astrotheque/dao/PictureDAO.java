@@ -1,6 +1,8 @@
 package com.github.ffremont.astrotheque.dao;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.core.StartupListener;
 import com.github.ffremont.astrotheque.service.DynamicProperties;
@@ -9,6 +11,7 @@ import com.github.ffremont.astrotheque.service.model.Belong;
 import com.github.ffremont.astrotheque.service.model.Picture;
 import com.github.ffremont.astrotheque.service.model.PictureState;
 import com.github.ffremont.astrotheque.web.model.Observation;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
+@Slf4j
 public class PictureDAO implements StartupListener {
 
     public final static String THUMB_FILENAME = "thumb.jpg";
@@ -34,7 +38,10 @@ public class PictureDAO implements StartupListener {
 
     private final static ConcurrentHashMap<String, Belong<Picture>> DATASTORE = new ConcurrentHashMap<>();
 
-    private final static ObjectMapper JSON = new ObjectMapper();
+    private final static ObjectMapper JSON = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .registerModule(new JavaTimeModule());
+
 
     private final Path dataDir;
 
@@ -81,6 +88,7 @@ public class PictureDAO implements StartupListener {
                             throw new RuntimeException(e);
                         }
                     });
+            log.debug("Astrothèque chargée !");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -126,12 +134,8 @@ public class PictureDAO implements StartupListener {
      * @param pictureId
      * @return
      */
-    public InputStream getBin(String owner, String pictureId, String filename) {
-        try {
-            return Files.newInputStream(locationOf(pictureId, owner).resolve(filename));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public Path getBin(String owner, String pictureId, String filename) {
+        return locationOf(pictureId, owner).resolve(filename);
     }
 
     /**

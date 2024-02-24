@@ -30,7 +30,7 @@ import static com.github.ffremont.astrotheque.core.httpserver.route.JsonRoute.*;
 @Slf4j
 public class AstrothequeApplication {
 
-    private final static Path HTML_DIR = Paths.get("./dist").toAbsolutePath();
+    public final static Path HTML_DIR = Paths.get("./dist").toAbsolutePath();
 
     /**
      * @param args
@@ -52,19 +52,22 @@ public class AstrothequeApplication {
         var imageResource = ioc.get(ImageResource.class);
         var loginResource = ioc.get(LoginResource.class);
 
-        server.createContext("/", new FrontendContext(HTML_DIR));
+        server.createContext("/", ioc.get(FrontendContext.class));
         server.createContext("/login", SimpleContext.with(
                 post("", loginResource::login, LoginRequest.class)
         ));
+        server.createContext("/logout", SimpleContext.with(
+                        post("", loginResource::logout, LoginRequest.class)
+                ))
+                .setAuthenticator(ioc.get(AstroAuthenticator.class));
         server.createContext("/api", SimpleContext.with(
                         get("/pictures$", pictureRessource::all),
-                        get("/pictures/(\\w+)$", pictureRessource::get),
                         delete("/pictures/(\\w+)", pictureRessource::delete),
                         put("/pictures/(\\w+)", pictureRessource::update, Picture.class),
 
                         StreamingRoute.get("/pictures/raw/(\\w+)$", imageResource::raw, "image/fits"),
                         StreamingRoute.get("/pictures/thumb/(\\w+)$", imageResource::thumb, "image/jpeg"),
-                        StreamingRoute.get("/pictures/image/(\\w+)$", imageResource::thumb, "image/jpeg"),
+                        StreamingRoute.get("/pictures/image/(\\w+)$", imageResource::image, "image/jpeg"),
                         StreamingRoute.get("/pictures/annotated/(\\w+)$", imageResource::annotated, "image/jpeg")
                 ))
                 .setAuthenticator(ioc.get(AstroAuthenticator.class));

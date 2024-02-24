@@ -12,8 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -24,20 +26,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class AccountService implements StartupListener {
 
-
     private static final int LEVEL_WAIT = 5;
     private static final int WAIT = 5;
     private final Map<String, AtomicInteger> attempts;
     private final AstroAuthenticator astroAuthenticator;
 
+    private final AccountDao dao;
 
-    private AccountDao dao;
+    private final Set<String> blackListJwt;
 
 
     public AccountService(IoC ioC) {
         this.attempts = new ConcurrentHashMap<>();
         this.dao = ioC.get(AccountDao.class);
         this.astroAuthenticator = ioC.get(AstroAuthenticator.class);
+        this.blackListJwt = new HashSet<>();
     }
 
 
@@ -46,6 +49,14 @@ public class AccountService implements StartupListener {
         log.debug("Initialisation des comptes utilisateurs à 0 tentatives de connexion");
         List<Account> accountNames = dao.getAccounts();
         accountNames.forEach(account -> attempts.put(account.name(), new AtomicInteger(0)));
+    }
+
+    public void logout(String jwt) {
+        blackListJwt.add(jwt);
+    }
+
+    public boolean isBlacklistedToken(String jwt) {
+        return blackListJwt.contains(jwt);
     }
 
 

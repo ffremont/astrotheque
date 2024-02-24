@@ -1,5 +1,7 @@
 package com.github.ffremont.astrotheque.service.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -25,15 +27,17 @@ public enum Type {
     EMISSION_NEBULA(Collections.EMPTY_LIST),
     REFLECTION_NEBULA(Collections.EMPTY_LIST),
     SUPERNOVA_REMNANT(Collections.EMPTY_LIST),
-    PLANET(Collections.EMPTY_LIST)
-    ;
-    private List<String> code;
-    private Type(List<String> code){
+    PLANET(Collections.EMPTY_LIST);
+    private final List<String> code;
+
+    Type(List<String> code) {
         this.code = code;
     }
 
-    public static Type fromCode(String code){
-        return Arrays.asList(values()).stream()
+
+    @JsonCreator
+    public static Type fromCode(String code) {
+        return Arrays.stream(values())
                 .filter(type -> type.code.contains(code))
                 .findFirst().orElse(null);
     }

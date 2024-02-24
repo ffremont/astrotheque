@@ -4,7 +4,6 @@ import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.dao.DeepSkyCatalogDAO;
 import com.github.ffremont.astrotheque.service.model.CelestObject;
 import com.github.ffremont.astrotheque.service.model.DsoEntry;
-import com.github.ffremont.astrotheque.service.model.Type;
 
 import java.util.List;
 import java.util.Objects;
@@ -46,7 +45,7 @@ public class DeepSkyCatalogService {
                 moinsBrillant = dataEntry;
             }
         }
-        return Optional.ofNullable(moinsBrillant).map(dataEntry -> new CelestObject(Type.fromCode(dataEntry.type()),
+        return Optional.ofNullable(moinsBrillant).map(dataEntry -> new CelestObject(dataEntry.type(),
                 Optional.ofNullable(dataEntry.cat1())
                         .map(c -> c + dataEntry.id1())
                         .orElse(dataEntry.cat2() + dataEntry.id2())));

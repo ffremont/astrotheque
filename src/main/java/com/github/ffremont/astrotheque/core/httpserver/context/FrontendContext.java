@@ -10,23 +10,27 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static com.github.ffremont.astrotheque.AstrothequeApplication.HTML_DIR;
+
 @Slf4j
 public class FrontendContext implements HttpHandler {
 
-
     private final HttpHandler frontendHandler;
+
     private final String indexHtml;
     private final Path htmlDir;
 
-    public FrontendContext(Path htmlDir) {
+
+    public FrontendContext() {
         try {
-            this.indexHtml = Files.readString(htmlDir.resolve("index.html"));
-            this.htmlDir = htmlDir;
+            this.indexHtml = Files.readString(HTML_DIR.resolve("index.html"));
+            this.htmlDir = HTML_DIR;
         } catch (IOException e) {
-            throw new RuntimeException("Index.html introuvable dans " + htmlDir.toString(), e);
+            throw new RuntimeException("Index.html introuvable dans " + HTML_DIR, e);
         }
-        frontendHandler = SimpleFileServer.createFileHandler(htmlDir.toAbsolutePath());
+        frontendHandler = SimpleFileServer.createFileHandler(HTML_DIR.toAbsolutePath());
     }
+
 
     /**
      * Retourne l'index si
@@ -57,4 +61,6 @@ public class FrontendContext implements HttpHandler {
             frontendHandler.handle(exchange);
         }
     }
+
+
 }

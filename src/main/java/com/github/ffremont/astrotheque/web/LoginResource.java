@@ -7,6 +7,10 @@ import com.github.ffremont.astrotheque.service.AccountService;
 import com.github.ffremont.astrotheque.service.model.Jwt;
 import com.github.ffremont.astrotheque.web.model.LoginRequest;
 
+import java.net.HttpCookie;
+
+import static com.github.ffremont.astrotheque.core.security.AstroAuthenticator.COOKIE_NAME;
+
 public class LoginResource {
 
     private final AccountService accountService;
@@ -26,6 +30,21 @@ public class LoginResource {
                         .replace("$VALUE", jwt.bearer())
                         .replace("$MA", jwt.maxAge().toString()));
 
-        return "ok";
+        return null;
+
+    }
+
+    public String logout(HttpExchangeWrapper wrapper) {
+        HttpCookie cookie = HttpCookie.parse(wrapper.httpExchange().getRequestHeaders().getFirst("Cookie")).stream().filter(httpCookie -> COOKIE_NAME.equals(httpCookie.getName()))
+                .findFirst().orElseThrow();
+
+        accountService.logout(cookie.getValue());
+
+        wrapper.httpExchange().getResponseHeaders().add("Set-Cookie",
+                "$COOKIE=$VALUE; Max-Age=-1; HttpOnly"
+                        .replace("$COOKIE", AstroAuthenticator.COOKIE_NAME)
+                        .replace("$VALUE", cookie.getValue()));
+
+        return null;
     }
 }
