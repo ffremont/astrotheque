@@ -1,6 +1,7 @@
 <div align="center">
-    <img src="img/astro-logo.png" alt="Logo" height="20%" />
+    <code>
 
+🄰🅂🅃🅁🄾🅃🄷🄴̀🅀🅄🄴</code>
 
 <h3 align="center">Votre photothèque astro</h3>
 
