@@ -42,8 +42,9 @@ public class AstroAuthenticator extends Authenticator {
 
     @Override
     public Result authenticate(HttpExchange exch) {
-        Optional<HttpCookie> cookie = HttpCookie.parse(exch.getRequestHeaders().getFirst("Cookie")).stream().filter(httpCookie -> COOKIE_NAME.equals(httpCookie.getName()))
-                .findFirst();
+        String headerCookie = exch.getRequestHeaders().getFirst("Cookie");
+        Optional<HttpCookie> cookie = Optional.ofNullable(headerCookie).flatMap(hc -> HttpCookie.parse(hc).stream().filter(httpCookie -> COOKIE_NAME.equals(httpCookie.getName()))
+                .findFirst());
         if (cookie.isEmpty() || ioc.get(AccountService.class).isBlacklistedToken(cookie.get().getValue())) {
             return new Authenticator.Failure(401);
         }

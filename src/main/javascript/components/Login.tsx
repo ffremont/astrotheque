@@ -1,12 +1,13 @@
-import { Avatar, Box, Button, Grid, Link, TextField, Typography } from "@mui/material";
+import { Alert, Avatar, Box, Button, Grid, Link, TextField, Typography } from "@mui/material";
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { useFetch } from "../hooks/useFetch";
 import { useNavigate } from "react-router-dom";
 
 export const Login = () => {
-    const myFetch = useFetch();
+    const [error, setError] = useState(false);
     const navigate = useNavigate();
+    const myFetch = useFetch();
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -18,9 +19,11 @@ export const Login = () => {
             formDataObject[name] = value as string;
         }
 
-        myFetch.post('/api/login', formDataObject)
-            .then(() => navigate('/'))
-            .catch(() => alert(`Une erreur est survenue, si le problème persiste contacter l'admin`));
+        myFetch.post('/login', formDataObject)
+            .then(() => {
+                navigate('/');
+        })
+            .catch(() => setError(true));
     };
 
     return (<Box
@@ -37,6 +40,7 @@ export const Login = () => {
         <Typography component="h1" variant="h5">
             Se connecter
         </Typography>
+        
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             <TextField
                 margin="normal"
@@ -62,6 +66,8 @@ export const Login = () => {
             control={<Checkbox value="remember" color="primary" />}
             label="Remember me"
     />*/}
+    {error && <Alert sx={{textAlign:'left'}} severity="error">
+            Login / mot de passe invalide, si le problème persiste contacter l'admin</Alert>}
             <Button
                 type="submit"
                 fullWidth

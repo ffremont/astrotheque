@@ -112,11 +112,11 @@ public class PictureDAO implements StartupListener {
     public void allocate(String owner, List<String> ids, Observation obs) {
         for (String id : ids) {
             DATASTORE.put(id, new Belong<>(owner, Picture.builder().id(id)
-                    .weather(obs.getWeather())
+                    .weather(obs.weather())
                     .imported(LocalDateTime.now())
-                    .instrument(obs.getInstrument())
-                    .corrRed(obs.getCorrred())
-                    .observationId(obs.getId())
+                    .instrument(obs.instrument())
+                    .corrRed(obs.corrred())
+                    .observationId(obs.id())
                     .state(PictureState.PENDING).build()));
         }
     }

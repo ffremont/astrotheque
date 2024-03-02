@@ -18,7 +18,7 @@ import static java.util.function.Predicate.not;
 
 @Slf4j
 public class DeepSkyCatalogDAO {
-    
+
     private final ConnectionPoolManager connectionPoolManager;
 
     public DeepSkyCatalogDAO(IoC ioC) {

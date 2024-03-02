@@ -33,13 +33,29 @@ body {
     min-height: 100vh;
 }
 
-.yarl__slide{
+.yarl__slide {
     flex-direction: column;
     padding-bottom: 1.5rem !important;
 }
 
-.fab-add-obs{
+.fab-add-obs {
     position: fixed !important;
     bottom: 2rem;
     right: 2rem;
+}
+
+form .form-intro {
+    margin-bottom: 1rem;
+}
+form .form-section {
+    padding: 0.6rem;
+    margin-bottom: 1rem;
+}
+form .form-actions{
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+form .form-section .form-control + .form-control{
+    margin:0.5rem 0rem;
 }

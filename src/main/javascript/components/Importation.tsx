@@ -1,9 +1,43 @@
-import { Box, Button, Card, CardContent, CardMedia, Chip, NativeSelect, Paper, TextField, Typography } from "@mui/material"
+import { Box, Button, Card, CardContent, CardMedia, NativeSelect, Paper, TextField, Typography } from "@mui/material"
 import obs from '../assets/obs.jpeg'
+import { SubmitHandler, useForm } from "react-hook-form"
+import { useLocalStorage } from "usehooks-ts"
+import { useEffect } from "react"
+
+type Inputs = {
+    weather: string,
+    instrument: string,
+    corrred: string,
+    location: string
+}
 
 export const Importation = () => {
-    return (<Box>
-        <Card sx={{ marginBottom: '1rem' }}>
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        formState: { errors },
+    } = useForm<Inputs>({
+        shouldUseNativeValidation: true,
+
+    })
+    const [instrument, saveInstrument] = useLocalStorage("instrument", '');
+    const [location, saveLocation] = useLocalStorage("location", 'maison');
+    const [corrred, saveCorrred] = useLocalStorage("corrred", '');
+    useEffect(() => setValue('instrument', instrument), [instrument]);
+    useEffect(() => setValue('corrred', corrred), [corrred]);
+    useEffect(() => setValue('location', location), [location]);
+
+    const onSubmit: SubmitHandler<Inputs> = (data) => {
+        saveInstrument(data.instrument);
+        saveCorrred(data.corrred);
+        saveLocation(data.location);
+
+
+    }
+
+    return (<Box component="form" onSubmit={handleSubmit(onSubmit)}>
+        <Card className="form-intro">
             <CardMedia
                 sx={{ height: 140 }}
                 image={obs}
@@ -19,68 +53,73 @@ export const Importation = () => {
             </CardContent>
         </Card>
 
-        <Paper sx={{ padding: "0.6rem" }}>
+        <Paper className="form-section">
             <Typography align="left" sx={{ fontWeight: "bold" }} gutterBottom>
                 Fichiers FITS
             </Typography>
 
             <TextField type="file"
+                required
                 inputProps={{
-                    multiple: true
+                    multiple: true,
+                    accept: "image/fits"
                 }}
                 fullWidth label="Fichiers FITs" variant="standard" />
 
         </Paper>
 
-        <Paper sx={{ padding: "0.6rem", marginTop: '1rem' }}>
+        <Paper className="form-section">
             <Typography align="left" sx={{ fontWeight: "bold" }} gutterBottom>
                 Fichiers Aperçu (facultatif)
             </Typography>
-            <Typography align="justify" variant="body2"  gutterBottom>
+            <Typography align="justify" variant="body2" gutterBottom>
                 Les fichiers doivent avoir le même nom que les fichiers FITs afin de les associer ensemble.
             </Typography>
 
             <TextField type="file"
                 inputProps={{
-                    multiple: true
+                    multiple: true,
+                    accept: "image/jpeg,image/jpg"
                 }}
                 fullWidth label="Fichiers apercu" variant="standard" />
 
         </Paper>
 
-        <Paper sx={{ padding: "0.6rem", marginTop: '1rem' }}>
+        <Paper className="form-section">
             <Typography align="left" sx={{ fontWeight: "bold" }} gutterBottom>
                 Conditions
             </Typography>
 
-            <TextField fullWidth label="Lieu" variant="standard" />
+            <TextField className="form-control" fullWidth required {...register("location", { required: true, maxLength: 256, minLength:2 })} error={!!errors.location} 
+            label="Lieu" variant="standard" helperText="Nom de l'endroit d'observation" />
             <NativeSelect
+                className="form-control"
+                required {...register("weather", { required: true})} error={!!errors.weather}
                 fullWidth
                 defaultValue={30}
                 inputProps={{
                     name: 'weather',
                 }}
             >
-                <option value={10}>Ten</option>
-                <option value={20}>Twenty</option>
-                <option value={30}>Thirty</option>
+                <option value={'VERY_GOOD'}>Excellente</option>
+                <option value={'GOOD'}>Bonne</option>
+                <option value={'FAVORABLE'}>Favorable</option>
+                <option value={'BAD'}>Mauvaise</option>
             </NativeSelect>
         </Paper>
 
-        <Paper sx={{ padding: "0.6rem", marginTop: '1rem' }}>
+        <Paper className="form-section">
             <Typography align="left" sx={{ fontWeight: "bold" }} gutterBottom>
-                Setup
+                Equipement
             </Typography>
 
-            <TextField fullWidth label="Instrument" variant="standard" />
-            <TextField fullWidth label="Correcteur / reducteur" variant="standard" />
+            <TextField className="form-control" fullWidth required {...register("instrument", { required: true, maxLength: 256, minLength:2 })} error={!!errors.instrument}  label="Instrument" variant="standard" />
+            <TextField className="form-control" fullWidth {...register("corrred", {  maxLength: 256, minLength:2 })} error={!!errors.corrred} label="Correcteur / reducteur" variant="standard" />
         </Paper>
 
-        <Box display="flex" gap="1rem" justifyContent="center" sx={{ marginTop: "1rem" }}>
+        <Box className="form-actions">
             <Button>Annuler</Button>
             <Button type="submit" variant="contained">Importer</Button>
         </Box>
-
-
     </Box>)
 }

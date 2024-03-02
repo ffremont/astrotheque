@@ -1,3 +1,4 @@
+import { HttpError } from "../types/HttpError";
 
 
 interface FetchMethods {
@@ -8,20 +9,20 @@ interface FetchMethods {
 
 export const useFetch = (defaultTimeout = 5000): FetchMethods => {
     const call = async <T>(url: string, options: RequestInit) => {
+            let status = 0;
             try{
                 const response = await fetch(url, options);
-
+                status = response.status;
             if (!response.ok) {
                 throw new Error('Erreur lors de appel')
             }
 
-            const responseData: T = await response.json()
+            const responseData: T = status !== 204 ? await response.json() : null
             return responseData
-        }catch(e){
+        }catch(e: Error  | any){
             console.error(e);
-            throw e;
+            throw new HttpError(status, e?.message);
         }
-       
     }
 
     const get = async <T>(url: string) => {

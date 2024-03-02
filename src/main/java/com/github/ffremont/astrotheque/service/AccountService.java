@@ -6,18 +6,19 @@ import com.github.ffremont.astrotheque.core.exception.InvalidLoginExeption;
 import com.github.ffremont.astrotheque.core.security.AstroAuthenticator;
 import com.github.ffremont.astrotheque.core.security.MetaToken;
 import com.github.ffremont.astrotheque.dao.AccountDao;
+import com.github.ffremont.astrotheque.dao.ConfigurationDao;
 import com.github.ffremont.astrotheque.service.model.Account;
+import com.github.ffremont.astrotheque.service.model.Configuration;
 import com.github.ffremont.astrotheque.service.model.Jwt;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.github.ffremont.astrotheque.service.InstallService.CONFIG_FILENAME;
 
 /**
  * Gère les comptes utilisateurs
@@ -34,11 +35,13 @@ public class AccountService implements StartupListener {
     private final AccountDao dao;
 
     private final Set<String> blackListJwt;
+    private final ConfigurationDao configDao;
 
 
     public AccountService(IoC ioC) {
         this.attempts = new ConcurrentHashMap<>();
         this.dao = ioC.get(AccountDao.class);
+        this.configDao = ioC.get(ConfigurationDao.class);
         this.astroAuthenticator = ioC.get(AstroAuthenticator.class);
         this.blackListJwt = new HashSet<>();
     }
@@ -47,8 +50,19 @@ public class AccountService implements StartupListener {
     @Override
     public void onStartup(IoC ioC) {
         log.debug("Initialisation des comptes utilisateurs à 0 tentatives de connexion");
+        DynamicProperties props = ioC.get(DynamicProperties.class);
+        Configuration config = configDao.get(props.getDataDir().resolve(CONFIG_FILENAME), props.getSecret());
+        Optional.ofNullable(config).ifPresent(c -> dao.register(c.admin().login(), c.admin().pwd()));
+
         List<Account> accountNames = dao.getAccounts();
         accountNames.forEach(account -> attempts.put(account.name(), new AtomicInteger(0)));
+    }
+
+    public Account register(String login, String pwd) {
+        Account acc = dao.register(login, pwd);
+        attempts.put(acc.name(), new AtomicInteger(0));
+
+        return acc;
     }
 
     public void logout(String jwt) {

@@ -26,7 +26,7 @@ public class IoC {
         });
     }
 
-    public <T> T get(Class<T> type) {
+    public <T> T get(final Class<T> type) {
         var key = type.getCanonicalName();
         if (!beans.containsKey(key)) {
             try {

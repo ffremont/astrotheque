@@ -9,10 +9,10 @@ import com.github.ffremont.astrotheque.dao.DeepSkyCatalogDAO;
 import com.github.ffremont.astrotheque.dao.PictureDAO;
 import com.github.ffremont.astrotheque.service.AccountService;
 import com.github.ffremont.astrotheque.service.DynamicProperties;
+import com.github.ffremont.astrotheque.service.model.Configuration;
 import com.github.ffremont.astrotheque.service.model.Picture;
-import com.github.ffremont.astrotheque.web.ImageResource;
-import com.github.ffremont.astrotheque.web.LoginResource;
-import com.github.ffremont.astrotheque.web.PictureResource;
+import com.github.ffremont.astrotheque.web.*;
+import com.github.ffremont.astrotheque.web.model.Empty;
 import com.github.ffremont.astrotheque.web.model.LoginRequest;
 import com.sun.net.httpserver.HttpServer;
 import lombok.extern.slf4j.Slf4j;
@@ -51,16 +51,27 @@ public class AstrothequeApplication {
         var pictureRessource = ioc.get(PictureResource.class);
         var imageResource = ioc.get(ImageResource.class);
         var loginResource = ioc.get(LoginResource.class);
+        var meResource = ioc.get(MeResource.class);
+        var confResource = ioc.get(ConfigurationResource.class);
+        var obsResource = ioc.get(ObservationResource.class);
 
         server.createContext("/", ioc.get(FrontendContext.class));
         server.createContext("/login", SimpleContext.with(
                 post("", loginResource::login, LoginRequest.class)
         ));
+        server.createContext("/install", SimpleContext.with(
+                post("", confResource::install, Configuration.class),
+                get("", confResource::isInstalled)
+        ));
         server.createContext("/logout", SimpleContext.with(
-                        post("", loginResource::logout, LoginRequest.class)
+                        post("", loginResource::logout, Empty.class)
                 ))
                 .setAuthenticator(ioc.get(AstroAuthenticator.class));
+        server.createContext("/api/observation", obsResource)
+                .setAuthenticator(ioc.get(AstroAuthenticator.class));
         server.createContext("/api", SimpleContext.with(
+                        get("/config", confResource::getConfig),
+                        get("/me", meResource::myProfil),
                         get("/pictures$", pictureRessource::all),
                         delete("/pictures/(\\w+)", pictureRessource::delete),
                         put("/pictures/(\\w+)", pictureRessource::update, Picture.class),
