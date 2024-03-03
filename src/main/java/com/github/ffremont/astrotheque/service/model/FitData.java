@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 public class FitData {
     String id;
-    Path path;
+    Path tempFile;
     Integer gain;
     Integer stackCnt;
     LocalDateTime dateObs;

@@ -72,7 +72,7 @@ public class MultipartUtils {
                         .findFirst()
                         .orElse(Collections.emptyMap());
 
-                final String filename = fields.getOrDefault("filename", "null");
+                final String filename = fields.getOrDefault("filename", null);
                 Part.PartBuilder partBuilder = Part.builder()
                         .name(fields.getOrDefault("name", "unknown"))
                         .filename(filename)

@@ -1,8 +1,11 @@
-import { Box, Button, Card, CardContent, CardMedia, NativeSelect, Paper, TextField, Typography } from "@mui/material"
+import { Box, Button, Card, CardContent, CardMedia, CircularProgress, NativeSelect, Paper, TextField, Typography } from "@mui/material"
 import obs from '../assets/obs.jpeg'
 import { SubmitHandler, useForm } from "react-hook-form"
 import { useLocalStorage } from "usehooks-ts"
-import { useEffect } from "react"
+import { blue } from '@mui/material/colors';
+import { useEffect, useRef, useState } from "react"
+import { useFetch } from "../hooks/useFetch"
+import { useNavigate } from "react-router-dom";
 
 type Inputs = {
     weather: string,
@@ -21,6 +24,11 @@ export const Importation = () => {
         shouldUseNativeValidation: true,
 
     })
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+    const fitFiles = useRef(null);
+    const previewFiles = useRef(null);
+    const myFetch = useFetch(15*60000);
     const [instrument, saveInstrument] = useLocalStorage("instrument", '');
     const [location, saveLocation] = useLocalStorage("location", 'maison');
     const [corrred, saveCorrred] = useLocalStorage("corrred", '');
@@ -29,11 +37,36 @@ export const Importation = () => {
     useEffect(() => setValue('location', location), [location]);
 
     const onSubmit: SubmitHandler<Inputs> = (data) => {
+        setLoading(true);
         saveInstrument(data.instrument);
         saveCorrred(data.corrred);
         saveLocation(data.location);
 
+        const form = new FormData();
+        form.append('data', JSON.stringify({
+            location: data.location,
+            weather: data.weather,
+            instrument: data.instrument,
+            corrred: data.corrred
+        }));
+        if (fitFiles.current) {
+            const files: any = (fitFiles.current as HTMLElement).querySelector('input')?.files;
+            for (let index = 0; index < files.length; index++) {
+                form.append('fits', files[index]);
+            }
+        }
+        if (previewFiles.current) {
+            const files: any = (previewFiles.current as HTMLElement).querySelector('input')?.files;
+            for (let index = 0; index < files.length; index++) {
+                form.append('previews', files[index]);
+            }
+        }
 
+        myFetch.post('/api/observation', form)
+        .then(() => {
+            navigate('/');
+        })
+        .catch(() => navigate('/error'))
     }
 
     return (<Box component="form" onSubmit={handleSubmit(onSubmit)}>
@@ -60,6 +93,8 @@ export const Importation = () => {
 
             <TextField type="file"
                 required
+                ref={fitFiles}
+                name="fits"
                 inputProps={{
                     multiple: true,
                     accept: "image/fits"
@@ -77,6 +112,8 @@ export const Importation = () => {
             </Typography>
 
             <TextField type="file"
+                ref={previewFiles}
+                name="preview"
                 inputProps={{
                     multiple: true,
                     accept: "image/jpeg,image/jpg"
@@ -90,11 +127,11 @@ export const Importation = () => {
                 Conditions
             </Typography>
 
-            <TextField className="form-control" fullWidth required {...register("location", { required: true, maxLength: 256, minLength:2 })} error={!!errors.location} 
-            label="Lieu" variant="standard" helperText="Nom de l'endroit d'observation" />
+            <TextField className="form-control" fullWidth required {...register("location", { required: true, maxLength: 256, minLength: 2 })} error={!!errors.location}
+                label="Lieu" variant="standard" helperText="Nom de l'endroit d'observation" />
             <NativeSelect
                 className="form-control"
-                required {...register("weather", { required: true})} error={!!errors.weather}
+                required {...register("weather", { required: true })} error={!!errors.weather}
                 fullWidth
                 defaultValue={30}
                 inputProps={{
@@ -113,13 +150,23 @@ export const Importation = () => {
                 Equipement
             </Typography>
 
-            <TextField className="form-control" fullWidth required {...register("instrument", { required: true, maxLength: 256, minLength:2 })} error={!!errors.instrument}  label="Instrument" variant="standard" />
-            <TextField className="form-control" fullWidth {...register("corrred", {  maxLength: 256, minLength:2 })} error={!!errors.corrred} label="Correcteur / reducteur" variant="standard" />
+            <TextField className="form-control" fullWidth required {...register("instrument", { required: true, maxLength: 256, minLength: 2 })} error={!!errors.instrument} label="Instrument" variant="standard" />
+            <TextField className="form-control" fullWidth {...register("corrred", { maxLength: 256, minLength: 2 })} error={!!errors.corrred} label="Correcteur / reducteur" variant="standard" />
         </Paper>
 
         <Box className="form-actions">
             <Button>Annuler</Button>
-            <Button type="submit" variant="contained">Importer</Button>
+            <Button type="submit" disabled={loading} variant="contained">Importer</Button>
+            {loading && (
+                <CircularProgress
+                    size={24}
+                    sx={{
+                        color: blue[500],
+                        marginTop: '6px',
+                        marginLeft: '-83px'
+                    }}
+                />
+            )}
         </Box>
     </Box>)
 }

@@ -9,6 +9,7 @@ import { Login } from './components/Login';
 import { Importation } from './components/Importation';
 import { AstrothequeProvider } from './providers/AstrothequeProvider';
 import { Installation } from './components/Installation';
+import { Error } from './components/Error';
 
 function App() {
     const myTheme = createTheme(themeOptions);
@@ -20,6 +21,7 @@ function App() {
                     <Route index element={<Home />} />
 
                     <Route path="login" element={<Login />} />
+                    <Route path="error" element={<Error />} />
                     <Route path="importation" element={<Importation />} />
                     <Route path="installation" element={<Installation />} />
 

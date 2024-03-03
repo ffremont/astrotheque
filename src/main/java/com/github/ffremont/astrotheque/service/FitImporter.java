@@ -14,8 +14,9 @@ import net.coobird.thumbnailator.Thumbnails;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
-import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -26,7 +27,7 @@ public class FitImporter implements Runnable {
     /**
      * Temps entre chaque appel pour vérifier l'avancement du job
      */
-    final int TEMPO_MS = 10000;
+    final int TEMPO_MS = 20000;
 
 
     private final AstrometryDAO astrometryDAO;
@@ -36,29 +37,27 @@ public class FitImporter implements Runnable {
     private final DeepSkyCatalogService deepSkyCatalogService;
 
     private final Observation observation;
-    private final List<FitData> fits;
 
     private final String astrometryNovaApikey;
     private final String owner;
 
-    public FitImporter(AstrometryDAO astrometryDAO, PictureDAO pictureDAO, MoonService moonService, DeepSkyCatalogService deepSkyCatalogService, Observation observation, List<FitData> fits, String astrometryNovaApikey, String owner) {
+    public FitImporter(AstrometryDAO astrometryDAO, PictureDAO pictureDAO, MoonService moonService, DeepSkyCatalogService deepSkyCatalogService, Observation observation, String astrometryNovaApikey, String owner) {
         this.astrometryDAO = astrometryDAO;
         this.pictureDAO = pictureDAO;
         this.moonService = moonService;
         this.deepSkyCatalogService = deepSkyCatalogService;
         this.observation = observation;
-        this.fits = fits;
         this.astrometryNovaApikey = astrometryNovaApikey;
         this.owner = owner;
     }
 
-    public FitImporter(IoC ioC, Observation observation, List<FitData> fits, String astrometryNovaApikey, String owner) {
+    public FitImporter(IoC ioC, Observation observation, String astrometryNovaApikey, String owner) {
         this(
                 ioC.get(AstrometryDAO.class),
                 ioC.get(PictureDAO.class),
                 ioC.get(MoonService.class),
                 ioC.get(DeepSkyCatalogService.class),
-                observation, fits, astrometryNovaApikey, owner
+                observation, astrometryNovaApikey, owner
         );
     }
 
@@ -66,13 +65,23 @@ public class FitImporter implements Runnable {
     public void run() {
         var sessionId = astrometryDAO.createLoginSession(astrometryNovaApikey);
 
-        for (FitData fit : fits) {
+        for (FitData fit : observation.fits()) {
             var counter = 0;
+            Optional<Path> preview = observation.previews().stream()
+                    .filter(p -> !p.getFileName().endsWith(".fit"))
+                    .filter(p -> p.getFileName().toString().startsWith(fit.getTempFile().getFileName().toString().replace(".fit", ""))).findFirst();
             try {
                 var pictureId = fit.getId();
-                var jpgPath = fit.getPath().resolveSibling(fit.getPath().getFileName().toString().replace(".fit", ".jpg"));
-                var submissionId = astrometryDAO.upload(sessionId, jpgPath);
+                if (Objects.isNull(sessionId)) {
+                    throw new ImportProcessException("Session id nova astrometry null");
+                }
 
+                //var submissionId = astrometryDAO.upload(sessionId, fit.getTempFile());
+                var submissionId = astrometryDAO.upload(sessionId, preview.get());
+
+                if (Objects.isNull(submissionId)) {
+                    throw new ImportProcessException("Submission id nova astrometry null");
+                }
                 while (counter < 60) {
                     log.info("{}/ waiting for {}", owner, pictureId);
                     Thread.sleep(TEMPO_MS);
@@ -89,10 +98,19 @@ public class FitImporter implements Runnable {
                     if (!"success".equals(info.status())) continue;
 
                     var thumbnail = new ByteArrayOutputStream();
-                    Thumbnails.of(jpgPath.toFile())
-                            .size(512, 512)
-                            .outputFormat("jpg")
-                            .toOutputStream(thumbnail);
+                    if (preview.isPresent()) {
+                        Thumbnails.of(preview.get().toFile())
+                                .size(512, 512)
+                                .outputFormat("jpg")
+                                .toOutputStream(thumbnail);
+                    } else {
+                        Integer astroNovaImage = Optional.ofNullable(subInfo.images()).flatMap(images -> images.stream().findFirst())
+                                .orElseThrow(() -> new ImportProcessException("ImageId introuvable"));
+                        Thumbnails.of(astrometryDAO.getImage(astroNovaImage))
+                                .size(512, 512)
+                                .outputFormat("jpg")
+                                .toOutputStream(thumbnail);
+                    }
 
                     var tags = info.tags().stream().map(tag -> tag.replace(" ", "")).toList();
                     var celest = deepSkyCatalogService.findCelestObject(tags);
@@ -115,26 +133,33 @@ public class FitImporter implements Runnable {
                             .location(observation.location())
                             .type(celest.map(CelestObject::type).orElse(null))
                             .stackCnt(fit.getStackCnt())
-                            .novaAstrometryReportUrl("https://nova.astrometry.net/user_images/" + subInfo.user_images().stream().findFirst().orElseThrow())
+                            .novaAstrometryReportUrl(astrometryDAO.reportUrlOf(subInfo))
                             .build();
                     var annotated = astrometryDAO.getAnnotatedImage(jobId.get());
                     pictureDAO.save(
                             owner,
                             picture,
-                            Files.newInputStream(jpgPath),
+                            preview.isPresent() ? Files.newInputStream(preview.get()) : null,
                             new ByteArrayInputStream(thumbnail.toByteArray()),
-                            Files.newInputStream(fit.getPath()),
+                            Files.newInputStream(fit.getTempFile()),
                             annotated
                     );
                     log.info("✅ {}/ import of {}", owner, fit.getId());
                     break;
                 }
             } catch (Exception e) {
-                log.error("{}/ Analyze de l'image impossible : {}", owner, fit.getPath().toString(), e);
+                log.error("{}/ Analyze de l'image impossible : {}", owner, fit.getTempFile().toString(), e);
                 try {
+                    if (fit.getTempFile().toFile().delete()) {
+                        log.info("{}/ Effacement du fichier temporaire", owner);
+                    } else {
+                        log.info("{}/ Effacement du fichier temporaire", owner);
+                    }
+                    preview.ifPresent(path -> path.toFile().delete());
+
                     pictureDAO.remove(owner, fit.getId());
                 } catch (RuntimeException ee) {
-                    log.error("{}/ Effacement impossible de l'image {}", owner, fit.getId(), ee);
+                    log.error("{}/ Effacement impossible de l'image FIT/JPG/ {}", owner, fit.getId(), ee);
                 }
             }
         }

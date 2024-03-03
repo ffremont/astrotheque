@@ -30,12 +30,13 @@ export const useFetch = (defaultTimeout = 5000): FetchMethods => {
     }
 
     const post = async <T, U>(url: string, body: U) => {
+        const isFormData = body instanceof FormData;
         return call<T>(url, {
-            headers: {
-                'Content-Type': 'application/json',
+            headers: isFormData ? {} : {
+                'Content-Type': 'application/json'
             },
             method:'POST',
-            body: JSON.stringify(body),
+            body:  isFormData ? body : JSON.stringify(body),
             signal: AbortSignal.timeout(defaultTimeout),
         })
     }

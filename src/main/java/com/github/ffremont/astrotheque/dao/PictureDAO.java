@@ -24,8 +24,11 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
+
+import static java.nio.file.Files.walk;
 
 @Slf4j
 public class PictureDAO implements StartupListener {
@@ -149,8 +152,11 @@ public class PictureDAO implements StartupListener {
 
         try {
             Files.createDirectories(pictureDir);
+            if (Objects.nonNull(thumb)) {
+                Files.copy(thumb, pictureDir.resolve(pictureDir.resolve(THUMB_FILENAME)), StandardCopyOption.REPLACE_EXISTING);
+            }
+
             Files.copy(jpg, pictureDir.resolve(pictureDir.resolve(PICTURE_FILENAME)), StandardCopyOption.REPLACE_EXISTING);
-            Files.copy(thumb, pictureDir.resolve(pictureDir.resolve(THUMB_FILENAME)), StandardCopyOption.REPLACE_EXISTING);
             Files.copy(raw, pictureDir.resolve(pictureDir.resolve(RAW_FILENAME)), StandardCopyOption.REPLACE_EXISTING);
             Files.copy(annotated, pictureDir.resolve(pictureDir.resolve(ANNOTATED_FILENAME)), StandardCopyOption.REPLACE_EXISTING);
 
@@ -184,10 +190,11 @@ public class PictureDAO implements StartupListener {
         try {
             if (DATASTORE.containsKey(pictureId)) {
                 DATASTORE.remove(pictureId);
-                Files.walk(pictureDir)
-                        .sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
+                try (Stream<Path> dir = walk(pictureDir)) {
+                    dir.sorted(Comparator.reverseOrder())
+                            .map(Path::toFile)
+                            .forEach(File::delete);
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

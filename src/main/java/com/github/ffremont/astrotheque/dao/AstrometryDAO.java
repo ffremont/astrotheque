@@ -1,13 +1,17 @@
 package com.github.ffremont.astrotheque.dao;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.ffremont.astrotheque.core.IoC;
+import com.github.ffremont.astrotheque.core.client.TraceHttpBodySubscriber;
 import com.github.ffremont.astrotheque.service.DynamicProperties;
 import com.github.ffremont.astrotheque.service.model.NovaInfo;
 import com.github.ffremont.astrotheque.service.model.NovaLogin;
 import com.github.ffremont.astrotheque.service.model.NovaSubmission;
 import com.github.ffremont.astrotheque.service.model.NovaUpload;
 import com.github.mizosoft.methanol.MultipartBodyPublisher;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,12 +22,17 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Objects;
 
+@Slf4j
 public class AstrometryDAO {
 
     final String baseurl;
 
-    private final static ObjectMapper JSON = new ObjectMapper();
+
+    private final static ObjectMapper JSON = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .registerModule(new JavaTimeModule());
     private final HttpClient httpClient;
 
     public AstrometryDAO(String baseurl) {
@@ -47,18 +56,19 @@ public class AstrometryDAO {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(this.baseurl + "/api/login"))
                     .timeout(Duration.ofSeconds(15))
-                    .headers("Content-Type", "application/json")
+                    .headers("Content-Type", "application/x-www-form-urlencoded")
                     .POST(HttpRequest.BodyPublishers.ofString("""
-                            {
-                                "request-json": {
-                                    "apikey": "$APIKEY"
-                                }                            
-                            }
+                            request-json={"apikey": "$APIKEY"}
                             """.replace("$APIKEY", apiKey)))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            return JSON.readValue(response.body(), NovaLogin.class).session();
+            final String body = response.body();
+            String session = JSON.readValue(body, NovaLogin.class).session();
+            if (Objects.isNull(session)) {
+                log.error("Nova Astrometry session invalid {}", body);
+            }
+            return session;
         } catch (URISyntaxException | IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -77,7 +87,7 @@ public class AstrometryDAO {
                                 "publicly_visible": "n",
                                 "allow_modifications": "d",
                                 "session": "$SESSION",
-                                "allow_commercial_use": "d"                           
+                                "allow_commercial_use": "d"                          
                             }
                             """.replace("$SESSION", sessionId))
                     .filePart("file", file)
@@ -88,9 +98,18 @@ public class AstrometryDAO {
                     .timeout(Duration.ofMinutes(5))
                     .headers("Content-Type", "multipart/form-data")
                     .POST(multipartBody)
+
                     .build();
+
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            return JSON.readValue(response.body(), NovaUpload.class).subid();
+            multipartBody.subscribe(new TraceHttpBodySubscriber());
+            final String body = response.body();
+            NovaUpload upload = JSON.readValue(response.body(), NovaUpload.class);
+            if (Objects.isNull(upload.subid())) {
+                log.error("Submission id introuvable {}", body);
+            }
+            return upload.subid();
+
         } catch (IOException | URISyntaxException | InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -115,6 +134,31 @@ public class AstrometryDAO {
         } catch (URISyntaxException | IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Retourne JPG image
+     *
+     * @param imageId
+     * @return
+     */
+    public InputStream getImage(Integer imageId) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI(this.baseurl + "/image/" + imageId))
+                    .timeout(Duration.ofSeconds(15))
+                    .GET()
+                    .build();
+            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+            return response.body();
+        } catch (URISyntaxException | IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String reportUrlOf(NovaSubmission subInfo) {
+        return "https://nova.astrometry.net/user_images/" + subInfo.user_images().stream().findFirst().orElseThrow();
     }
 
     /**

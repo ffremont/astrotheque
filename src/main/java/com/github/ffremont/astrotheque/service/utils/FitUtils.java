@@ -38,7 +38,7 @@ public class FitUtils {
                         }
                     });
             return FitData.builder()
-                    .path(fitFile)
+                    .tempFile(fitFile)
                     .gain(Integer.valueOf(Optional.ofNullable(hdu.getHeader().findCard("GAIN")).map(HeaderCard::getValue).orElse("120")))
                     .stackCnt(Integer.valueOf(
                             Optional.ofNullable(hdu.getHeader().findCard("STACKCNT")).map(HeaderCard::getValue).orElse("1"))
@@ -55,9 +55,7 @@ public class FitUtils {
                             Optional.ofNullable(hdu.getHeader().findCard("CCD-TEMP")).map(HeaderCard::getValue).orElse("20"))
                     )
                     .build();
-        } catch (FitsException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
+        } catch (FitsException | IOException e) {
             throw new RuntimeException(e);
         }
     }
