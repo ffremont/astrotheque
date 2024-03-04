@@ -2,6 +2,7 @@ package com.github.ffremont.astrotheque.dao;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.core.StartupListener;
@@ -18,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -43,6 +43,7 @@ public class PictureDAO implements StartupListener {
 
     private final static ObjectMapper JSON = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .registerModule(new JavaTimeModule());
 
 
@@ -153,14 +154,14 @@ public class PictureDAO implements StartupListener {
         try {
             Files.createDirectories(pictureDir);
             if (Objects.nonNull(thumb)) {
-                Files.copy(thumb, pictureDir.resolve(pictureDir.resolve(THUMB_FILENAME)), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(thumb, pictureDir.resolve(THUMB_FILENAME));
             }
 
-            Files.copy(jpg, pictureDir.resolve(pictureDir.resolve(PICTURE_FILENAME)), StandardCopyOption.REPLACE_EXISTING);
-            Files.copy(raw, pictureDir.resolve(pictureDir.resolve(RAW_FILENAME)), StandardCopyOption.REPLACE_EXISTING);
-            Files.copy(annotated, pictureDir.resolve(pictureDir.resolve(ANNOTATED_FILENAME)), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(jpg, pictureDir.resolve(PICTURE_FILENAME));
+            Files.copy(raw, pictureDir.resolve(RAW_FILENAME));
+            Files.copy(annotated, pictureDir.resolve(ANNOTATED_FILENAME));
 
-            Files.write(pictureDir.resolve(pictureDir.resolve(DATA_FILENAME)), JSON.writer().writeValueAsBytes(picture), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+            Files.write(pictureDir.resolve(DATA_FILENAME), JSON.writer().writeValueAsBytes(picture), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
 
             DATASTORE.put(picture.getId(), new Belong<>(owner, picture));
         } catch (IOException e) {

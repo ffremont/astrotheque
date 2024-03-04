@@ -57,7 +57,7 @@ export const Login = () => {
                 required
                 fullWidth
                 name="pwd"
-                label="Mot de"
+                label="Mot de passe"
                 type="password"
                 id="password"
                 autoComplete="current-password"

@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.ffremont.astrotheque.core.IoC;
-import com.github.ffremont.astrotheque.core.client.TraceHttpBodySubscriber;
 import com.github.ffremont.astrotheque.service.DynamicProperties;
 import com.github.ffremont.astrotheque.service.model.NovaInfo;
 import com.github.ffremont.astrotheque.service.model.NovaLogin;
 import com.github.ffremont.astrotheque.service.model.NovaSubmission;
 import com.github.ffremont.astrotheque.service.model.NovaUpload;
+import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MultipartBodyPublisher;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,7 +37,7 @@ public class AstrometryDAO {
 
     public AstrometryDAO(String baseurl) {
         this.baseurl = baseurl;
-        this.httpClient = HttpClient.newBuilder().build();
+        this.httpClient = Methanol.create();
     }
 
     public AstrometryDAO(IoC ioC) {
@@ -83,7 +83,7 @@ public class AstrometryDAO {
         try {
             MultipartBodyPublisher multipartBody = MultipartBodyPublisher.newBuilder()
                     .textPart("request-json", """
-                            {
+                                {
                                 "publicly_visible": "n",
                                 "allow_modifications": "d",
                                 "session": "$SESSION",
@@ -94,15 +94,14 @@ public class AstrometryDAO {
                     .build();
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(this.baseurl + "/api/upload"))
+                    .uri(new URI(STR."\{this.baseurl}/api/upload"))
                     .timeout(Duration.ofMinutes(5))
                     .headers("Content-Type", "multipart/form-data")
                     .POST(multipartBody)
-
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            multipartBody.subscribe(new TraceHttpBodySubscriber());
+
             final String body = response.body();
             NovaUpload upload = JSON.readValue(response.body(), NovaUpload.class);
             if (Objects.isNull(upload.subid())) {

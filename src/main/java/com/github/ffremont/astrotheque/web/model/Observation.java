@@ -6,7 +6,6 @@ import com.github.ffremont.astrotheque.service.model.FitData;
 import com.github.ffremont.astrotheque.service.model.Weather;
 import lombok.Builder;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,7 +21,7 @@ public record Observation(
         String instrument,
         String corrred,
         List<FitData> fits,
-        List<Path> previews) {
+        List<PreviewData> previews) {
 
     public Observation {
         check(

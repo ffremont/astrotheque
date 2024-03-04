@@ -6,6 +6,7 @@ export type Picture = {
     state: 'PENDING' | 'DONE'
     imported: number
     name: string
+    filename: string
     moonPhase: MoonPhase
     dateObs: number
     weather: 'VERY_GOOD' | 'FAVORABLE' | 'GOOD' | 'BAD'

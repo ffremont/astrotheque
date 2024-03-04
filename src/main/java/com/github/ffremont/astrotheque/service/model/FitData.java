@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class FitData {
     String id;
     Path tempFile;
+    String filename;
     Integer gain;
     Integer stackCnt;
     LocalDateTime dateObs;

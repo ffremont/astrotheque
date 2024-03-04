@@ -6,17 +6,18 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_224;
 
-public class FitMapper implements Function<Path, FitData> {
+public class FitMapper implements Function<Map.Entry<String, Path>, FitData> {
     @Override
-    public FitData apply(Path path) {
+    public FitData apply(Map.Entry<String, Path> path) {
         return Optional.ofNullable(path)
-                .map(FitUtils::analyze)
+                .map(entry -> FitUtils.analyze(entry.getValue()).toBuilder().filename(entry.getKey()).build())
                 .map(fit -> {
                     try {
                         return fit.toBuilder()

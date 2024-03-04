@@ -1,6 +1,9 @@
 package com.github.ffremont.astrotheque.core.httpserver.route;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
@@ -12,7 +15,10 @@ import static java.util.Objects.isNull;
 
 public class JsonRoute implements Route {
 
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private final static ObjectMapper JSON = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            .registerModule(new JavaTimeModule());
 
 
     private final Method method;
@@ -59,7 +65,7 @@ public class JsonRoute implements Route {
 
                 OutputStream outputStream = exchange.getResponseBody();
                 exchange.getResponseHeaders().add("Content-Type", "application/json");
-                exchange.sendResponseHeaders(200, jsonResponse.length());
+                exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
                 outputStream.write(jsonResponse.getBytes());
                 outputStream.flush();
             }

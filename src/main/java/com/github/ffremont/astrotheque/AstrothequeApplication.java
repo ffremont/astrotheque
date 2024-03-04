@@ -73,13 +73,13 @@ public class AstrothequeApplication {
                         get("/config", confResource::getConfig),
                         get("/me", meResource::myProfil),
                         get("/pictures$", pictureRessource::all),
-                        delete("/pictures/(\\w+)", pictureRessource::delete),
-                        put("/pictures/(\\w+)", pictureRessource::update, Picture.class),
+                        delete("/pictures/([\\w\\-]+)", pictureRessource::delete),
+                        put("/pictures/([\\w\\-]+)", pictureRessource::update, Picture.class),
 
-                        StreamingRoute.get("/pictures/raw/(\\w+)$", imageResource::raw, "image/fits"),
-                        StreamingRoute.get("/pictures/thumb/(\\w+)$", imageResource::thumb, "image/jpeg"),
-                        StreamingRoute.get("/pictures/image/(\\w+)$", imageResource::image, "image/jpeg"),
-                        StreamingRoute.get("/pictures/annotated/(\\w+)$", imageResource::annotated, "image/jpeg")
+                        StreamingRoute.get("/pictures/raw/([\\w\\-]+)$", imageResource::raw, "image/fits"),
+                        StreamingRoute.get("/pictures/thumb/([\\w\\-]+)$", imageResource::thumb, "image/jpeg"),
+                        StreamingRoute.get("/pictures/image/([\\w\\-]+)$", imageResource::image, "image/jpeg"),
+                        StreamingRoute.get("/pictures/annotated/([\\w\\-]+)$", imageResource::annotated, "image/jpeg")
                 ))
                 .setAuthenticator(ioc.get(AstroAuthenticator.class));
 

@@ -1,0 +1,1 @@
+ export type Share = {url:string, title:string, text:string}

@@ -1,7 +1,7 @@
 import { AppBar, Badge, Box, Divider, IconButton, ListItemIcon, Menu, MenuItem, Toolbar, Typography } from "@mui/material";
 import { useState } from "react";
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import UploadIcon from '@mui/icons-material/Upload';
 import { AccountCircle, Logout, Settings } from "@mui/icons-material";
 import { useAstrotheque } from "../../hooks/useAstrotheque";
 import { useFetch } from "../../hooks/useFetch";
@@ -43,8 +43,8 @@ export const Header = () => {
                     size="large"
                     aria-label="show 17 new notifications"
                 >
-                    <Badge badgeContent={17} color="error">
-                        <NotificationsIcon />
+                    <Badge variant="dot" color="error">
+                        <UploadIcon />
                     </Badge>
                 </IconButton>
                 <IconButton size="large" onClick={handleMenu}>

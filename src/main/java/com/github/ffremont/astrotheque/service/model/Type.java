@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static com.fasterxml.jackson.annotation.JsonCreator.Mode.DELEGATING;
+
 /**
  *
  */
@@ -35,10 +37,10 @@ public enum Type {
     }
 
 
-    @JsonCreator
-    public static Type fromCode(String code) {
+    @JsonCreator(mode = DELEGATING)
+    public static Type fromCode(String name) {
         return Arrays.stream(values())
-                .filter(type -> type.code.contains(code))
+                .filter(type -> type.name().equals(name))
                 .findFirst().orElse(null);
     }
 }
