@@ -73,6 +73,7 @@ public class AstrothequeApplication {
                         get("/config", confResource::getConfig),
                         get("/me", meResource::myProfil),
                         get("/pictures$", pictureRessource::all),
+                        get("/pictures/([\\w\\-]+)$", pictureRessource::get),
                         delete("/pictures/([\\w\\-]+)", pictureRessource::delete),
                         put("/pictures/([\\w\\-]+)", pictureRessource::update, Picture.class),
 

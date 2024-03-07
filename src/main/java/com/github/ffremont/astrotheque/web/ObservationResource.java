@@ -36,7 +36,7 @@ public class ObservationResource implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        List<Part> parts = MultipartUtils.from(exchange);
+        List<Part> parts = MultipartUtils.from(exchange, (long) (1024 * 1024 * 1000));
         try {
             Observation obs = parts.stream().filter(part ->
                     "data".equals(part.name())
@@ -69,6 +69,5 @@ public class ObservationResource implements HttpHandler {
             exchange.sendResponseHeaders(204, -1);
             exchange.close();
         }
-        // return observationService.importObservation(exchange.getPrincipal().getUsername(), obs);
     }
 }

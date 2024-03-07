@@ -18,6 +18,10 @@ public class PictureService {
         return dao.getAll(accountName).toList();
     }
 
+    public Picture get(String accountName, String id) {
+        return dao.getById(accountName, id);
+    }
+
     public Picture delete(String accountName, String id) {
         Picture picture = dao.getById(accountName, id);
         dao.remove(accountName, id);

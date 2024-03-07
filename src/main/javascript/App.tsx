@@ -10,6 +10,7 @@ import { Importation } from './components/Importation';
 import { AstrothequeProvider } from './providers/AstrothequeProvider';
 import { Installation } from './components/Installation';
 import { Error } from './components/Error';
+import { PictureForm } from './components/PictureForm';
 
 function App() {
     const myTheme = createTheme(themeOptions);
@@ -23,6 +24,7 @@ function App() {
                     <Route path="login" element={<Login />} />
                     <Route path="error" element={<Error />} />
                     <Route path="importation" element={<Importation />} />
+                    <Route path="photos/:id" element={<PictureForm />} />
                     <Route path="installation" element={<Installation />} />
 
                     <Route path="*" element={<NoMatch />} />

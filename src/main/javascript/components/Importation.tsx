@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardContent, CardMedia, CircularProgress, NativeSelect, Paper, TextField, Typography } from "@mui/material"
+import { Alert, Box, Button, Card, CardContent, CardMedia, CircularProgress, NativeSelect, Paper, TextField, Typography } from "@mui/material"
 import obs from '../assets/obs.jpeg'
 import { SubmitHandler, useForm } from "react-hook-form"
 import { useLocalStorage } from "usehooks-ts"
@@ -6,12 +6,18 @@ import { blue } from '@mui/material/colors';
 import { useEffect, useRef, useState } from "react"
 import { useFetch } from "../hooks/useFetch"
 import { useNavigate } from "react-router-dom";
+import { MAX_UPLOAD_SIZE } from "../constant";
 
 type Inputs = {
     weather: string,
     instrument: string,
     corrred: string,
     location: string
+}
+
+type Issue = {
+    title:string,
+    message: string
 }
 
 export const Importation = () => {
@@ -27,8 +33,9 @@ export const Importation = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const fitFiles = useRef(null);
+    const [issue, setIssue] = useState<Issue|null>(null);
     const previewFiles = useRef(null);
-    const myFetch = useFetch(15*60000);
+    const myFetch = useFetch(15 * 60000);
     const [instrument, saveInstrument] = useLocalStorage("instrument", '');
     const [location, saveLocation] = useLocalStorage("location", 'maison');
     const [corrred, saveCorrred] = useLocalStorage("corrred", '');
@@ -37,12 +44,8 @@ export const Importation = () => {
     useEffect(() => setValue('location', location), [location]);
 
     const onSubmit: SubmitHandler<Inputs> = (data) => {
-        setLoading(true);
-        saveInstrument(data.instrument);
-        saveCorrred(data.corrred);
-        saveLocation(data.location);
-
         const form = new FormData();
+        let totalSize = 0;
         form.append('data', JSON.stringify({
             location: data.location,
             weather: data.weather,
@@ -53,20 +56,33 @@ export const Importation = () => {
             const files: any = (fitFiles.current as HTMLElement).querySelector('input')?.files;
             for (let index = 0; index < files.length; index++) {
                 form.append('fits', files[index]);
+                totalSize += parseInt(files[index].size);
             }
         }
         if (previewFiles.current) {
             const files: any = (previewFiles.current as HTMLElement).querySelector('input')?.files;
             for (let index = 0; index < files.length; index++) {
                 form.append('previews', files[index]);
+                totalSize += parseInt(files[index].size);
             }
         }
-
+        
+        if(totalSize > MAX_UPLOAD_SIZE){
+            setIssue({
+                title:"Téléversement",
+                message: `La taille totale de "${(totalSize/(1024*1024)).toFixed(1)}Mo" excède la limitation de ${(MAX_UPLOAD_SIZE/(1024*1024)).toFixed(0)}Mo.`
+            })
+            return;
+        }
+        setLoading(true);
+        saveInstrument(data.instrument);
+        saveCorrred(data.corrred);
+        saveLocation(data.location);
         myFetch.post('/api/observation', form)
-        .then(() => {
-            navigate('/');
-        })
-        .catch(() => navigate('/error'))
+            .then(() => {
+                navigate('/');
+            })
+            .catch(() => navigate('/error'))
     }
 
     return (<Box component="form" onSubmit={handleSubmit(onSubmit)}>
@@ -100,7 +116,6 @@ export const Importation = () => {
                     accept: "image/fits"
                 }}
                 fullWidth label="Fichiers FITs" variant="standard" />
-
         </Paper>
 
         <Paper className="form-section">
@@ -153,6 +168,10 @@ export const Importation = () => {
             <TextField className="form-control" fullWidth required {...register("instrument", { required: true, maxLength: 256, minLength: 2 })} error={!!errors.instrument} label="Instrument" variant="standard" />
             <TextField className="form-control" fullWidth {...register("corrred", { maxLength: 256, minLength: 2 })} error={!!errors.corrred} label="Correcteur / reducteur" variant="standard" />
         </Paper>
+
+        {issue && <Alert sx={{textAlign:'left',marginBottom:'1rem'}} severity="error">
+            <strong>{issue.title}</strong>{' '}{issue.message}
+        </Alert>}
 
         <Box className="form-actions">
             <Button>Annuler</Button>

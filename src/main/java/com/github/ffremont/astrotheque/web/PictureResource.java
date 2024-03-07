@@ -35,6 +35,11 @@ public class PictureResource {
         return service.getAll(exchangeWrapper.httpExchange().getPrincipal().getUsername());
     }
 
+    public Picture get(HttpExchangeWrapper exchangeWrapper) {
+        String id = exchangeWrapper.pathParams().stream().findFirst().orElseThrow();
+        return service.get(exchangeWrapper.httpExchange().getPrincipal().getUsername(), id);
+    }
+
     /**
      * @param exchangeWrapper
      * @return

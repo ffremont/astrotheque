@@ -59,3 +59,10 @@ form .form-actions{
 form .form-section .form-control + .form-control{
     margin:0.5rem 0rem;
 }
+form .form-section .field + .field{
+    margin-top:0.8rem;
+}
+
+.yarl__slide_description{
+    text-align: center;
+}

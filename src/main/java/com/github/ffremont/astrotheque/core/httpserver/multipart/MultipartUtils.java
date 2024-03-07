@@ -4,6 +4,7 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.apache.commons.fileupload.MultipartStream;
 import org.apache.commons.fileupload.ParameterParser;
+import org.apache.commons.io.input.BoundedInputStream;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -41,13 +42,13 @@ public class MultipartUtils {
      * @param httpExchange
      * @return
      */
-    public static List<Part> from(HttpExchange httpExchange) {
+    public static List<Part> from(HttpExchange httpExchange, Long limitationReadBytes) {
         final String contentTypePrefix = "Content-Type: ";
         Headers headers = httpExchange.getRequestHeaders();
         String contentType = headers.getFirst("Content-Type");
         String boundary = contentType.substring(contentType.indexOf("boundary=") + 9);
 
-        MultipartStream multipartStream = new MultipartStream(httpExchange.getRequestBody(), boundary.getBytes(StandardCharsets.UTF_8));
+        MultipartStream multipartStream = new MultipartStream(new BoundedInputStream(httpExchange.getRequestBody(), limitationReadBytes), boundary.getBytes(StandardCharsets.UTF_8));
 
         List<Part> parts = new ArrayList<>();
         ParameterParser parser = new ParameterParser();

@@ -5,10 +5,12 @@ import UploadIcon from '@mui/icons-material/Upload';
 import { AccountCircle, Logout, Settings } from "@mui/icons-material";
 import { useAstrotheque } from "../../hooks/useAstrotheque";
 import { useFetch } from "../../hooks/useFetch";
+import { useNavigate } from "react-router-dom";
 
 export const Header = () => {
     const { username } = useAstrotheque();
     const myFetch = useFetch();
+    const navigate = useNavigate();
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -33,7 +35,7 @@ export const Header = () => {
 
     return (<AppBar position="fixed">
         <Toolbar>
-            <Typography variant="h6" className="main-title" noWrap component="div" >
+            <Typography onClick={() => navigate('/')} variant="h6" className="main-title" noWrap component="div" >
                 Astrothèque
             </Typography>
             <Box sx={{ flexGrow: 1 }} />

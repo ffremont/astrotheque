@@ -8,7 +8,7 @@ export type Picture = {
     name: string
     filename: string
     moonPhase: MoonPhase
-    dateObs: number
+    dateObs: string
     weather: 'VERY_GOOD' | 'FAVORABLE' | 'GOOD' | 'BAD'
     instrument: string
     location: string
