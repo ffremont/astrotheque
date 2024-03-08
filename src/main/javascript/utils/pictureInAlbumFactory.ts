@@ -26,6 +26,7 @@ export const fromList = (pictures: Picture[]): PictureInAlbum[] => {
             picture.corrRed,
             MoonPhases[picture.moonPhase],
             `Météo : ${Weathers[picture.weather]}`,
+            picture.tags.join(', ')
         ]
             .filter((cell) => !!cell)
             .join(' / ')}`

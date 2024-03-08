@@ -175,14 +175,13 @@ public class FitImporter implements Runnable {
             } catch (Exception e) {
                 log.error("{}/ Analyze de l'image impossible : {}", owner, fit.getTempFile().toString(), e);
                 try {
+                    pictureDAO.cancel(owner, fit.getId());
                     if (fit.getTempFile().toFile().delete()) {
                         log.info("{}/ Effacement du fichier temporaire", owner);
                     } else {
                         log.info("{}/ Effacement du fichier temporaire", owner);
                     }
                     preview.ifPresent(path -> path.tempFile().toFile().delete());
-
-                    pictureDAO.remove(owner, fit.getId());
                 } catch (RuntimeException ee) {
                     log.error("{}/ Effacement impossible de l'image FIT/JPG/ {}", owner, fit.getId(), ee);
                 }

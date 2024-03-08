@@ -47,7 +47,7 @@ public class JsonRoute implements Route {
     }
 
     public static JsonRoute put(String path, Function<HttpExchangeWrapper, Object> jsonHandler, Class bodyClass) {
-        return new JsonRoute(Method.PUT, path, jsonHandler);
+        return new JsonRoute(Method.PUT, path, jsonHandler, bodyClass);
     }
 
     public static JsonRoute delete(String path, Function<HttpExchangeWrapper, Object> jsonHandler) {

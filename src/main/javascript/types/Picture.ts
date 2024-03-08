@@ -3,7 +3,7 @@ import { MoonPhase } from './MoonPhase'
 export type Picture = {
     id: string
     observationId: string
-    state: 'PENDING' | 'DONE'
+    state: 'PENDING' | 'DONE' | 'FAILED'
     imported: number
     name: string
     filename: string

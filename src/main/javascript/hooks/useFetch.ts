@@ -5,6 +5,7 @@ interface FetchMethods {
     call<T>(url: string, options: RequestInit): Promise<T>,
     get<T>(url: string): Promise<T>
     post<T, U>(url: string, body: U): Promise<T>
+    put<T, U>(url: string, body: U): Promise<T>
 }
 
 export const useFetch = (defaultTimeout = 5000): FetchMethods => {
@@ -41,9 +42,22 @@ export const useFetch = (defaultTimeout = 5000): FetchMethods => {
         })
     }
 
+    const put = async <T, U>(url: string, body: U) => {
+        const isFormData = body instanceof FormData;
+        return call<T>(url, {
+            headers: isFormData ? {} : {
+                'Content-Type': 'application/json'
+            },
+            method:'PUT',
+            body:  isFormData ? body : JSON.stringify(body),
+            signal: AbortSignal.timeout(defaultTimeout),
+        })
+    }
+
     return {
         get,
         post,
+        put,
         call
     }
 }

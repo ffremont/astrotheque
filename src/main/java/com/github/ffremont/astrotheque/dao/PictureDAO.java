@@ -173,10 +173,29 @@ public class PictureDAO implements StartupListener {
         final var pictureDir = locationOf(picture.getId(), owner);
 
         try {
-            Files.deleteIfExists(pictureDir.resolve(pictureDir.resolve(DATA_FILENAME)));
-            Files.write(pictureDir.resolve(pictureDir.resolve(DATA_FILENAME)), JSON.writer().writeValueAsBytes(picture), StandardOpenOption.CREATE);
+            Files.deleteIfExists(pictureDir.resolve(DATA_FILENAME));
+            Files.write(pictureDir.resolve((DATA_FILENAME)), JSON.writer().writeValueAsBytes(picture), StandardOpenOption.CREATE);
 
             DATASTORE.put(picture.getId(), new Belong<>(owner, picture));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void cancel(String owner, String pictureId) {
+        final var pictureDir = locationOf(pictureId, owner);
+
+        try {
+            if (DATASTORE.containsKey(pictureId)) {
+                Belong<Picture> picture = DATASTORE.get(pictureId);
+                DATASTORE.put(pictureId, new Belong<>(owner, picture.getData().toBuilder().state(PictureState.FAILED).build()));
+                
+                try (Stream<Path> dir = walk(pictureDir)) {
+                    dir.sorted(Comparator.reverseOrder())
+                            .map(Path::toFile)
+                            .forEach(File::delete);
+                }
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

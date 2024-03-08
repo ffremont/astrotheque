@@ -1,5 +1,5 @@
 import { Box, Button, Card, CardMedia, CircularProgress, MenuItem, Paper, Select, TextField, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { SyntheticEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Picture } from "../types/Picture";
 import { useFetch } from "../hooks/useFetch";
@@ -8,9 +8,11 @@ import { blue } from '@mui/material/colors';
 import { constellations } from "../types/Constellations";
 import { Weathers } from "../types/Weathers";
 import { MoonPhases } from "../types/MoonPhases";
+import { useAstrotheque } from "../hooks/useAstrotheque";
 
 export const PictureForm = () => {
     let { id } = useParams();
+    const {setNotification } = useAstrotheque();
     const navigate = useNavigate();
     const myFetch = useFetch();
     const [loading, setLoading] = useState(false);
@@ -23,8 +25,32 @@ export const PictureForm = () => {
     }, []);
 
 
+    const handleSubmit = (e: SyntheticEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        const data: any = {};
+        new FormData(e.target as any).forEach((v, key) => {
+            if (key === 'tags') {
+                data[key] = (v as string).split(',').map(cel => cel.trim());
+            } else {
+                data[key] = v;
+            }
 
-    return (<Box component="form">
+        });
+        myFetch.put(`/api/pictures/${id}`,data)
+            .then(r => {
+                navigate('/');
+                setNotification({
+                    type:'success',
+                    title:`Succès de la mise à jour`,
+                    message: `Photo astro "${id}" modifiée.`
+                })
+            }).catch(e => {
+                navigate('/error')
+            });
+    }
+
+    return (<Box component="form" onSubmit={handleSubmit}>
         {picture && <><Card className="form-intro">
             <CardMedia
                 sx={{ height: 200 }}
@@ -135,6 +161,9 @@ export const PictureForm = () => {
                     type="number"
                     name="exposure"
                     className="field"
+                    inputProps={{
+                        step:"0.01"
+                    }}
                     fullWidth
                     defaultValue={picture.exposure}
                     variant="standard"

@@ -55,7 +55,11 @@ public class PictureResource {
      */
     public Picture update(HttpExchangeWrapper exchangeWrapper) {
         Picture body = (Picture) exchangeWrapper.body();
-        return service.update(exchangeWrapper.httpExchange().getPrincipal().getUsername(), body);
+        String id = exchangeWrapper.pathParams().stream().findFirst().orElseThrow();
+
+        return service.update(exchangeWrapper.httpExchange().getPrincipal().getUsername(), body.toBuilder()
+                .id(id)
+                .build());
     }
 
 

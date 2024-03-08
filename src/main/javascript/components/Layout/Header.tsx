@@ -1,5 +1,5 @@
 import { AppBar, Badge, Box, Divider, IconButton, ListItemIcon, Menu, MenuItem, Toolbar, Typography } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import UploadIcon from '@mui/icons-material/Upload';
 import { AccountCircle, Logout, Settings } from "@mui/icons-material";
@@ -7,12 +7,30 @@ import { useAstrotheque } from "../../hooks/useAstrotheque";
 import { useFetch } from "../../hooks/useFetch";
 import { useNavigate } from "react-router-dom";
 
-export const Header = () => {
-    const { username } = useAstrotheque();
+type HeaderProps = {
+    onClickImport: () => void
+}
+
+type BadgeState = 'info' | 'warning' | 'error'
+
+export const Header = ({ onClickImport }: HeaderProps) => {
+    const { username, pictures } = useAstrotheque();
     const myFetch = useFetch();
     const navigate = useNavigate();
+    const [state, setState] = useState<BadgeState> ('info');
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+    useEffect(() => {
+        if(pictures.some(p => p.state==='FAILED')){
+            setState('error');
+        }else if(pictures.some(p => p.state==='PENDING')){
+            setState('warning');
+        }else{
+            setState('info');
+        }
+        
+    }, [pictures]);
 
     const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -42,10 +60,11 @@ export const Header = () => {
 
             <Box>
                 <IconButton
+                    onClick={onClickImport}
                     size="large"
                     aria-label="show 17 new notifications"
                 >
-                    <Badge variant="dot" color="error">
+                    <Badge variant="dot" color={state}>
                         <UploadIcon />
                     </Badge>
                 </IconButton>
