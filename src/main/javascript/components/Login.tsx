@@ -1,11 +1,17 @@
 import { Alert, Avatar, Box, Button, Grid, Link, TextField, Typography } from "@mui/material";
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { FormEvent, useState } from "react";
 import { useFetch } from "../hooks/useFetch";
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { useNavigate } from "react-router-dom";
+
+type Info = {
+    title:string,
+    message: string
+}
 
 export const Login = () => {
     const [error, setError] = useState(false);
+    const [info, setInfo] = useState<Info | null>(null);
     const navigate = useNavigate();
     const myFetch = useFetch();
 
@@ -22,9 +28,16 @@ export const Login = () => {
         myFetch.post('/login', formDataObject)
             .then(() => {
                 navigate('/');
-        })
+            })
             .catch(() => setError(true));
     };
+
+    const handleClickPwd = () => {
+        setInfo({
+            title: 'Mot de passé oublié',
+            message: `Veuillez contacter votre administrateur ou référez-vous à la procédure de remise à zéro de la configuration.`
+        })
+    }
 
     return (<Box
         sx={{
@@ -35,12 +48,12 @@ export const Login = () => {
         }}
     >
         <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
+            <AutoAwesomeIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
             Se connecter
         </Typography>
-        
+
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             <TextField
                 margin="normal"
@@ -66,8 +79,8 @@ export const Login = () => {
             control={<Checkbox value="remember" color="primary" />}
             label="Remember me"
     />*/}
-    {error && <Alert sx={{textAlign:'left'}} severity="error">
-            Login / mot de passe invalide, si le problème persiste contacter l'admin</Alert>}
+            {error && <Alert sx={{ textAlign: 'left' }} severity="error">
+                Login / mot de passe invalide, si le problème persiste contacter l'admin</Alert>}
             <Button
                 type="submit"
                 fullWidth
@@ -78,9 +91,14 @@ export const Login = () => {
             </Button>
             <Grid container>
                 <Grid item xs>
-                    <Link href="#" variant="body2">
+                    <Link component="div" variant="body2" onClick={handleClickPwd}>
                         Mot de passe oublié?
                     </Link>
+                </Grid>
+                <Grid item>
+                    {info && <Alert sx={{ textAlign: 'left', marginTop: '1rem' }} severity="info">
+                        <strong>{info.title}</strong>{' '}{info.message}
+                    </Alert>}
                 </Grid>
                 <Grid item>
                     {/*<Link href="#" variant="body2">

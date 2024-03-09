@@ -6,6 +6,9 @@ import { AccountCircle, Logout, Settings } from "@mui/icons-material";
 import { useAstrotheque } from "../../hooks/useAstrotheque";
 import { useFetch } from "../../hooks/useFetch";
 import { useNavigate } from "react-router-dom";
+import { Picture } from "../../types/Picture";
+import logo from '../../assets/icon512_rounded.png';
+import { REFRESH_PICTURES_INTERVAL } from "../../constant";
 
 type HeaderProps = {
     onClickImport: () => void
@@ -14,23 +17,40 @@ type HeaderProps = {
 type BadgeState = 'info' | 'warning' | 'error'
 
 export const Header = ({ onClickImport }: HeaderProps) => {
-    const { username, pictures } = useAstrotheque();
+    const { username, pictures, setPictures } = useAstrotheque();
     const myFetch = useFetch();
     const navigate = useNavigate();
-    const [state, setState] = useState<BadgeState> ('info');
+    const [state, setState] = useState<BadgeState>('info');
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
     useEffect(() => {
-        if(pictures.some(p => p.state==='FAILED')){
-            setState('error');
-        }else if(pictures.some(p => p.state==='PENDING')){
+        const haveFailed = pictures.some(p => p.state === 'FAILED');
+        const havePending = pictures.some(p => p.state === 'PENDING');
+
+        if (haveFailed && havePending) {
             setState('warning');
-        }else{
+        } else if (haveFailed && !havePending) {
+            setState('error');
+        } else if (!haveFailed && havePending) {
+            setState('warning');
+        } else {
             setState('info');
         }
-        
     }, [pictures]);
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            myFetch.get<Picture[]>('/api/pictures')
+                .then(pictures => {
+                    setPictures(pictures);
+                });
+        }, REFRESH_PICTURES_INTERVAL);
+
+        return () => {
+            clearInterval(intervalId);
+        }
+    }, []);
 
     const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -53,6 +73,9 @@ export const Header = ({ onClickImport }: HeaderProps) => {
 
     return (<AppBar position="fixed">
         <Toolbar>
+            <Box alignContent={"center"}  display={"flex"} sx={{marginRight:'0.3rem'}}>
+                <img src={logo} alt="logo" className="app-logo"/>
+            </Box>
             <Typography onClick={() => navigate('/')} variant="h6" className="main-title" noWrap component="div" >
                 Astrothèque
             </Typography>
@@ -93,6 +116,7 @@ export const Header = ({ onClickImport }: HeaderProps) => {
                         </ListItemIcon>
                         {username}
                     </MenuItem>
+
                     <Divider />
                     <MenuItem onClick={handleClose}>
                         <ListItemIcon>

@@ -11,10 +11,12 @@ import com.github.ffremont.astrotheque.web.model.Observation;
 import com.github.ffremont.astrotheque.web.model.PreviewData;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
+import org.apache.commons.io.FileUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
@@ -69,10 +71,17 @@ public class FitImporter implements Runnable {
         for (FitData fit : observation.fits()) {
             log.info("{} / ->️ Fit {}", owner, fit.getFilename());
             var counter = 0;
-            Optional<PreviewData> preview = observation.previews().stream()
-                    .filter(p -> !p.filename().endsWith(".fit"))
-                    .filter(p -> p.filename().startsWith(fit.getFilename().replace(".fit", "")))
-                    .findFirst();
+            Optional<PreviewData> preview = Optional.empty();
+
+            if (observation.fits().size() == 1 && observation.previews().size() == 1) {
+                preview = observation.previews().stream().findFirst();
+            } else {
+                preview = observation.previews().stream()
+                        .filter(p -> !p.filename().endsWith(".fit"))
+                        .filter(p -> p.filename().startsWith(fit.getFilename().replace(".fit", "")))
+                        .findFirst();
+            }
+
             try {
                 var pictureId = fit.getId();
                 if (Objects.isNull(sessionId)) {
@@ -122,10 +131,15 @@ public class FitImporter implements Runnable {
                                 .outputFormat("jpg")
                                 .toOutputStream(thumbnail);
                     } else {
-                        log.info("{} / ⬇ download image to build thumb...", owner);
+                        log.info("{} / ⬇ download image to define preview...", owner);
                         Integer astroNovaImage = Optional.ofNullable(subInfo.images()).flatMap(images -> images.stream().findFirst())
                                 .orElseThrow(() -> new ImportProcessException("ImageId introuvable"));
-                        Thumbnails.of(astrometryDAO.getImage(astroNovaImage))
+                        Path previewFile = Files.createTempFile("astrotheque_", ".jpg");
+                        FileUtils.copyInputStreamToFile(astrometryDAO.getImage(astroNovaImage), previewFile.toFile());
+                        preview = Optional.of(new PreviewData(previewFile, previewFile.toFile().getName()));
+                        
+                        log.info("{} / ⚙️ Building thumb...", owner);
+                        Thumbnails.of(Files.newInputStream(previewFile))
                                 .size(512, 512)
                                 .outputFormat("jpg")
                                 .toOutputStream(thumbnail);

@@ -78,7 +78,7 @@ export const Layout = () => {
                                     {p.state === 'FAILED' && <CloseIcon />}
                                 </ListItemIcon>
 
-                                <ListItemText primary={`${p.filename}`} />
+                                <ListItemText sx={{wordBreak: 'break-all'}} primary={`${p.filename}`} />
                             </ListItemButton>
                         </ListItem>)}
 
@@ -87,8 +87,6 @@ export const Layout = () => {
                             Aucune image importée
                         </Typography>
                     </p>}
-
-
                 </List>
             </Box>
         </Drawer>

@@ -1,1 +1,3 @@
 export const MAX_UPLOAD_SIZE= 1024*1024*1000;
+
+export const REFRESH_PICTURES_INTERVAL = 30000;

@@ -7,10 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.core.StartupListener;
 import com.github.ffremont.astrotheque.service.DynamicProperties;
-import com.github.ffremont.astrotheque.service.model.Account;
-import com.github.ffremont.astrotheque.service.model.Belong;
-import com.github.ffremont.astrotheque.service.model.Picture;
-import com.github.ffremont.astrotheque.service.model.PictureState;
+import com.github.ffremont.astrotheque.service.model.*;
 import com.github.ffremont.astrotheque.web.model.Observation;
 import lombok.extern.slf4j.Slf4j;
 
@@ -113,10 +110,11 @@ public class PictureDAO implements StartupListener {
      * @param ids
      * @param obs
      */
-    public void allocate(String owner, List<String> ids, Observation obs) {
-        for (String id : ids) {
-            DATASTORE.put(id, new Belong<>(owner, Picture.builder().id(id)
+    public void allocate(String owner, Observation obs) {
+        for (FitData fit : obs.fits()) {
+            DATASTORE.put(fit.getId(), new Belong<>(owner, Picture.builder().id(fit.getId())
                     .weather(obs.weather())
+                    .filename(fit.getFilename())
                     .imported(LocalDateTime.now())
                     .instrument(obs.instrument())
                     .corrRed(obs.corrred())
@@ -189,7 +187,7 @@ public class PictureDAO implements StartupListener {
             if (DATASTORE.containsKey(pictureId)) {
                 Belong<Picture> picture = DATASTORE.get(pictureId);
                 DATASTORE.put(pictureId, new Belong<>(owner, picture.getData().toBuilder().state(PictureState.FAILED).build()));
-                
+
                 try (Stream<Path> dir = walk(pictureDir)) {
                     dir.sorted(Comparator.reverseOrder())
                             .map(Path::toFile)

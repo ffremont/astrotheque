@@ -3,7 +3,7 @@ import { Autocomplete, Fab, InputAdornment, NativeSelect, TextField } from "@mui
 import { Box } from "@mui/system"
 import { useEffect, useState } from "react";
 import Lightbox from "yet-another-react-lightbox";
-import { Captions, Counter, Download, Share, Zoom } from "yet-another-react-lightbox/plugins";
+import { Captions, Counter, Download, Share } from "yet-another-react-lightbox/plugins";
 import { Edit } from "../libs/yet-another-react-lightbox/plugins/edit/Edit";
 import { Remove } from "../libs/yet-another-react-lightbox/plugins/remove/Remove";
 import AddIcon from '@mui/icons-material/Add';
@@ -55,9 +55,12 @@ export const Home = () => {
         myFetch.get<Picture[]>('/api/pictures')
             .then(pictures => {
                 setPictures(pictures);
-                setPicturesInAlbum(fromList(donePictures(pictures)));
             });
     }, [state]);
+
+    useEffect(() => {
+        setPicturesInAlbum(fromList(donePictures(pictures)));
+    }, [pictures])
 
 
     return (

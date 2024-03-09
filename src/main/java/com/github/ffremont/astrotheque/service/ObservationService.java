@@ -44,7 +44,7 @@ public class ObservationService {
         Observation newObs = obs.toBuilder().id(UUID.randomUUID().toString()).build();
 
         // persist ids
-        pictureDAO.allocate(accountName, newObs.fits().stream().map(FitData::getId).toList(), newObs);
+        pictureDAO.allocate(accountName, newObs);
 
         //background
         FIT_IMPORT_THREAD_POOL.submit(new FitImporter(

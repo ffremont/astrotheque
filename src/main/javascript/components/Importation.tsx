@@ -45,6 +45,8 @@ export const Importation = () => {
 
     const onSubmit: SubmitHandler<Inputs> = (data) => {
         const form = new FormData();
+        const fitNames = [];
+        const jpgNames = [];
         let totalSize = 0;
         form.append('data', JSON.stringify({
             location: data.location,
@@ -56,6 +58,7 @@ export const Importation = () => {
             const files: any = (fitFiles.current as HTMLElement).querySelector('input')?.files;
             for (let index = 0; index < files.length; index++) {
                 form.append('fits', files[index]);
+                fitNames.push(files[index].name);
                 totalSize += parseInt(files[index].size);
             }
         }
@@ -63,14 +66,32 @@ export const Importation = () => {
             const files: any = (previewFiles.current as HTMLElement).querySelector('input')?.files;
             for (let index = 0; index < files.length; index++) {
                 form.append('previews', files[index]);
+                jpgNames.push(files[index].name);
                 totalSize += parseInt(files[index].size);
             }
         }
+
         
         if(totalSize > MAX_UPLOAD_SIZE){
             setIssue({
                 title:"Téléversement",
                 message: `La taille totale de "${(totalSize/(1024*1024)).toFixed(1)}Mo" excède la limitation de ${(MAX_UPLOAD_SIZE/(1024*1024)).toFixed(0)}Mo.`
+            })
+            return;
+        }
+
+        if(!fitNames.every(filename => filename.endsWith(".fit"))){
+            setIssue({
+                title:"Fichiers FIT",
+                message: `Certains fichiers FIT n'ont pas l'extension .fit.`
+            })
+            return;
+        }
+
+        if(!jpgNames.every(filename => filename.endsWith(".jpg") || filename.endsWith(".jpeg"))){
+            setIssue({
+                title:"Fichiers JPG",
+                message: `Certains fichiers aperçus n'ont pas l'extension .jpg / .jpeg.`
             })
             return;
         }
@@ -104,7 +125,7 @@ export const Importation = () => {
 
         <Paper className="form-section">
             <Typography align="left" sx={{ fontWeight: "bold" }} gutterBottom>
-                Fichiers FITS
+                Fichiers FIT
             </Typography>
 
             <TextField type="file"
