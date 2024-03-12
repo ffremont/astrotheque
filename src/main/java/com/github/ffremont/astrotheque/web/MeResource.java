@@ -2,18 +2,19 @@ package com.github.ffremont.astrotheque.web;
 
 import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.core.httpserver.route.HttpExchangeWrapper;
-import com.github.ffremont.astrotheque.service.InstallService;
+import com.github.ffremont.astrotheque.service.ConfigService;
 import com.github.ffremont.astrotheque.service.model.Me;
 
 public class MeResource {
 
-    private final InstallService installService;
+    private final ConfigService configService;
 
     public MeResource(IoC ioC) {
-        this.installService = ioC.get(InstallService.class);
+        this.configService = ioC.get(ConfigService.class);
     }
 
     public Me myProfil(HttpExchangeWrapper wrapper) {
-        return installService.installed() ? new Me(wrapper.httpExchange().getPrincipal().getUsername()) : null;
+        return configService.installed() ? new Me(wrapper.httpExchange().getPrincipal().getUsername()) : null;
     }
+
 }

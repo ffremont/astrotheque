@@ -46,6 +46,10 @@ public class JsonRoute implements Route {
         return new JsonRoute(Method.POST, path, jsonHandler, bodyClass);
     }
 
+    public static JsonRoute patch(String path, Function<HttpExchangeWrapper, Object> jsonHandler, Class bodyClass) {
+        return new JsonRoute(Method.PATCH, path, jsonHandler, bodyClass);
+    }
+
     public static JsonRoute put(String path, Function<HttpExchangeWrapper, Object> jsonHandler, Class bodyClass) {
         return new JsonRoute(Method.PUT, path, jsonHandler, bodyClass);
     }

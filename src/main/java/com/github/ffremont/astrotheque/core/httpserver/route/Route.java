@@ -19,6 +19,6 @@ public interface Route extends Predicate<HttpExchange> {
 
 
     enum Method {
-        GET, POST, PUT, DELETE;
+        GET, POST, PUT, DELETE, PATCH;
     }
 }

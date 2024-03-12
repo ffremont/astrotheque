@@ -1,12 +1,12 @@
 package com.github.ffremont.astrotheque.service;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.core.StartupListener;
 import com.github.ffremont.astrotheque.core.exception.InvalidLoginExeption;
 import com.github.ffremont.astrotheque.core.security.AstroAuthenticator;
 import com.github.ffremont.astrotheque.core.security.MetaToken;
 import com.github.ffremont.astrotheque.dao.AccountDao;
-import com.github.ffremont.astrotheque.dao.ConfigurationDao;
 import com.github.ffremont.astrotheque.service.model.Account;
 import com.github.ffremont.astrotheque.service.model.Configuration;
 import com.github.ffremont.astrotheque.service.model.Jwt;
@@ -18,8 +18,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.github.ffremont.astrotheque.service.InstallService.CONFIG_FILENAME;
-
 /**
  * Gère les comptes utilisateurs
  * v1 : mono-utilisateur
@@ -28,20 +26,20 @@ import static com.github.ffremont.astrotheque.service.InstallService.CONFIG_FILE
 public class AccountService implements StartupListener {
 
     private static final int LEVEL_WAIT = 5;
-    private static final int WAIT = 5;
+    private static final int WAIT = 5000;
     private final Map<String, AtomicInteger> attempts;
     private final AstroAuthenticator astroAuthenticator;
 
     private final AccountDao dao;
 
     private final Set<String> blackListJwt;
-    private final ConfigurationDao configDao;
+    private final IoC ioc;
 
 
     public AccountService(IoC ioC) {
         this.attempts = new ConcurrentHashMap<>();
         this.dao = ioC.get(AccountDao.class);
-        this.configDao = ioC.get(ConfigurationDao.class);
+        this.ioc = ioC;
         this.astroAuthenticator = ioC.get(AstroAuthenticator.class);
         this.blackListJwt = new HashSet<>();
     }
@@ -50,9 +48,11 @@ public class AccountService implements StartupListener {
     @Override
     public void onStartup(IoC ioC) {
         log.debug("Initialisation des comptes utilisateurs à 0 tentatives de connexion");
-        DynamicProperties props = ioC.get(DynamicProperties.class);
-        Configuration config = configDao.get(props.getDataDir().resolve(CONFIG_FILENAME), props.getSecret());
-        Optional.ofNullable(config).ifPresent(c -> dao.register(c.admin().login(), c.admin().pwd()));
+        Configuration config = ioC.get(ConfigService.class).getConfiguration();
+        Optional.ofNullable(config).ifPresent(c -> {
+            dao.register(c.admin().login(), c.admin().pwd());
+            ioc.get(PictureService.class).load(c.admin().login());
+        });
 
         List<Account> accountNames = dao.getAccounts();
         accountNames.forEach(account -> attempts.put(account.name(), new AtomicInteger(0)));
@@ -73,6 +73,14 @@ public class AccountService implements StartupListener {
         return blackListJwt.contains(jwt);
     }
 
+    public void checkAdmin(String name) {
+        //throw new UnauthorizeException(name);
+    }
+
+
+    public String hashPwd(String password) {
+        return new String(BCrypt.withDefaults().hashToChar(12, password.toCharArray()));
+    }
 
     /**
      * Tentative de connexion
@@ -81,7 +89,10 @@ public class AccountService implements StartupListener {
      * @param pwd
      */
     public Jwt tryLogin(String login, String pwd) {
-        boolean pwdOkay = dao.findByName(login).pwd().equals(pwd);
+        String bcryptExpectPwd = dao.findByName(login).pwd();
+        BCrypt.Result result = BCrypt.verifyer().verify(pwd.toCharArray(), bcryptExpectPwd);
+
+        boolean pwdOkay = result.verified;
 
         if (!pwdOkay) {
             if (attempts.get(login).incrementAndGet() > LEVEL_WAIT) {

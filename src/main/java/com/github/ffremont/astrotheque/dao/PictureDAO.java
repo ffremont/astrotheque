@@ -7,7 +7,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.core.StartupListener;
 import com.github.ffremont.astrotheque.service.DynamicProperties;
-import com.github.ffremont.astrotheque.service.model.*;
+import com.github.ffremont.astrotheque.service.model.Belong;
+import com.github.ffremont.astrotheque.service.model.FitData;
+import com.github.ffremont.astrotheque.service.model.Picture;
+import com.github.ffremont.astrotheque.service.model.PictureState;
 import com.github.ffremont.astrotheque.web.model.Observation;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,7 +22,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,19 +64,13 @@ public class PictureDAO implements StartupListener {
         return dataDir.resolve(owner).resolve(pictureId);
     }
 
-    @Override
-    public void onStartup(IoC ioc) {
-        try {
-            List<Account> accounts = ioc.get(AccountDao.class).getAccounts();
-            Path dataDir = ioc.get(DynamicProperties.class).getDataDir();
-            if (!dataDir.toFile().exists()) Files.createDirectories(dataDir);
-
-            Files.list(dataDir)
-                    .filter(path -> accounts.stream().map(Account::name).toList().contains(path.toFile().getName()))
+    public void load(String accountName) {
+        try (Stream<Path> streamDataDir = Files.list(dataDir)) {
+            streamDataDir.filter(path -> accountName.equals(path.toFile().getName()))
                     .forEach(accountDataPath -> {
                         String owner = accountDataPath.toFile().getName();
-                        try {
-                            Files.list(accountDataPath)
+                        try (Stream<Path> streamAccountDataPath = Files.list(accountDataPath)) {
+                            streamAccountDataPath
                                     .filter(path -> path.toFile().isDirectory())
                                     .filter(dir -> !dir.getFileName().toString().startsWith("."))
                                     .forEach(pictureDir -> {
@@ -93,7 +89,17 @@ public class PictureDAO implements StartupListener {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    @Override
+    public void onStartup(IoC ioc) {
+        if (!dataDir.toFile().exists()) {
+            try {
+                Files.createDirectories(dataDir);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     /**
@@ -227,4 +233,6 @@ public class PictureDAO implements StartupListener {
     public Stream<Picture> getAll(String owner) {
         return DATASTORE.entrySet().stream().filter(entry -> entry.getValue().getOwner().equals(owner)).map(Map.Entry::getValue).map(Belong::getData);
     }
+
+
 }

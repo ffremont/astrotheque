@@ -80,7 +80,7 @@ export const Installation = () => {
             </Typography>
 
             <TextField fullWidth required {...register("adminLogin", { required: true, maxLength: 256 })} error={!!errors.adminLogin} label="Identifiant" variant="standard" />
-            <TextField fullWidth required {...register("adminPwd", { required: true, maxLength: 256 })} error={!!errors.adminLogin} label="adminPwd" type="password" variant="standard" />
+            <TextField fullWidth required {...register("adminPwd", { required: true, maxLength: 256 })} error={!!errors.adminLogin} label="Mot de passe administrateur" type="password" variant="standard" />
             <TextField fullWidth required {...register("adminConfirm", { required: true, maxLength: 256 })} error={!!errors.adminConfirm} label="Confirmer le mot de passe" type="password" variant="standard" />
             {!same && <Alert severity="error">La confirmation doit être identique au mot de passe.</Alert>}
         </Paper>

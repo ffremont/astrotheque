@@ -1,11 +1,14 @@
 package com.github.ffremont.astrotheque.service.model;
 
+import lombok.Builder;
+
 import static br.com.fluentvalidator.predicate.PredicateBuilder.from;
 import static br.com.fluentvalidator.predicate.StringPredicate.stringSizeGreaterThan;
 import static br.com.fluentvalidator.predicate.StringPredicate.stringSizeLessThan;
 import static com.github.ffremont.astrotheque.core.Validator.Condition.of;
 import static com.github.ffremont.astrotheque.core.Validator.check;
 
+@Builder(toBuilder = true)
 public record Configuration(
         String baseurl,
         String astrometryNovaApikey,
@@ -23,6 +26,7 @@ public record Configuration(
         );
     }
 
+    @Builder(toBuilder = true)
     public record Admin(String login, String pwd, String totp) {
         public Admin {
             check(

@@ -50,7 +50,7 @@ public class ObservationService {
         FIT_IMPORT_THREAD_POOL.submit(new FitImporter(
                 ioc,
                 newObs,
-                ioc.get(InstallService.class).getConfiguration().astrometryNovaApikey(),
+                ioc.get(ConfigService.class).getConfiguration().astrometryNovaApikey(),
                 accountName));
 
         return newObs;

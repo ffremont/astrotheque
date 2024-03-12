@@ -69,8 +69,10 @@ public class AstrothequeApplication {
                 .setAuthenticator(ioc.get(AstroAuthenticator.class));
         server.createContext("/api/observation", obsResource)
                 .setAuthenticator(ioc.get(AstroAuthenticator.class));
+
         server.createContext("/api", SimpleContext.with(
                         get("/config", confResource::getConfig),
+                        patch("/config", confResource::updateConfig, Configuration.class),
                         get("/me", meResource::myProfil),
                         get("/pictures$", pictureRessource::all),
                         get("/pictures/([\\w\\-]+)$", pictureRessource::get),

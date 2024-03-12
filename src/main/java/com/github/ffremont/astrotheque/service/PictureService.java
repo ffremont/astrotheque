@@ -14,6 +14,11 @@ public class PictureService {
         this.dao = ioC.get(PictureDAO.class);
     }
 
+
+    public void load(String accountName) {
+        dao.load(accountName);
+    }
+
     public List<Picture> getAll(String accountName) {
         return dao.getAll(accountName).toList();
     }

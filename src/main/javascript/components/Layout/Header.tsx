@@ -9,14 +9,16 @@ import { useNavigate } from "react-router-dom";
 import { Picture } from "../../types/Picture";
 import logo from '../../assets/icon512_rounded.png';
 import { REFRESH_PICTURES_INTERVAL } from "../../constant";
+import { recentPictures } from "../../utils/picturesFilters";
 
 type HeaderProps = {
     onClickImport: () => void
+    onClickConfig: () => void
 }
 
 type BadgeState = 'info' | 'warning' | 'error'
 
-export const Header = ({ onClickImport }: HeaderProps) => {
+export const Header = ({ onClickImport, onClickConfig }: HeaderProps) => {
     const { username, pictures, setPictures } = useAstrotheque();
     const myFetch = useFetch();
     const navigate = useNavigate();
@@ -25,8 +27,9 @@ export const Header = ({ onClickImport }: HeaderProps) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
     useEffect(() => {
-        const haveFailed = pictures.some(p => p.state === 'FAILED');
-        const havePending = pictures.some(p => p.state === 'PENDING');
+        const recent = recentPictures(pictures);
+        const haveFailed = recent.some(p => p.state === 'FAILED');
+        const havePending = recent.some(p => p.state === 'PENDING');
 
         if (haveFailed && havePending) {
             setState('warning');
@@ -60,6 +63,11 @@ export const Header = ({ onClickImport }: HeaderProps) => {
         setAnchorEl(null);
     };
 
+    const handleConfig = () => {
+        setAnchorEl(null);
+        onClickConfig();
+    }
+
     const handleLogout = () => {
         if (window.confirm(`Confirmez-vous la déconnexion ?`)) {
             myFetch.post('/logout', {})
@@ -85,7 +93,6 @@ export const Header = ({ onClickImport }: HeaderProps) => {
                 <IconButton
                     onClick={onClickImport}
                     size="large"
-                    aria-label="show 17 new notifications"
                 >
                     <Badge variant="dot" color={state}>
                         <UploadIcon />
@@ -118,7 +125,7 @@ export const Header = ({ onClickImport }: HeaderProps) => {
                     </MenuItem>
 
                     <Divider />
-                    <MenuItem onClick={handleClose}>
+                    <MenuItem onClick={handleConfig}>
                         <ListItemIcon>
                             <Settings fontSize="small" />
                         </ListItemIcon>

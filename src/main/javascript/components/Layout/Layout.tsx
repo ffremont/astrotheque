@@ -2,19 +2,19 @@ import { Alert, Box, CircularProgress, Container, Drawer, List, ListItem, ListIt
 import { Outlet, useLocation, useNavigate } from "react-router-dom"
 import { Header } from "./Header";
 import { useEffect, useState } from "react";
-import { useTheme } from '@mui/material/styles';
-import DoneIcon from '@mui/icons-material/Done';
-import CloseIcon from '@mui/icons-material/Close';
+
 import { useFetch } from "../../hooks/useFetch";
 import { HttpError } from "../../types/HttpError";
 import { Me } from "../../types/Me";
 import { useAstrotheque } from "../../hooks/useAstrotheque";
+import { ImporationDrawer } from "./ImportationDrawer";
+import { ConfigurationDialog } from "./ConfigurationDialog";
 
 export const Layout = () => {
-    const { username, setUsername, notification, pictures } = useAstrotheque();
+    const { username, setUsername, notification } = useAstrotheque();
     const [openNotification, setOpenNotification] = useState(false);
-    const theme = useTheme();
-
+    
+    const [configDialog, setConfigDialog] = useState(false);
     const [drawer, toggleDrawer] = useState(false);
     let location = useLocation();
     const navigate = useNavigate();
@@ -56,40 +56,11 @@ export const Layout = () => {
     }, [notification])
 
     return (<Container maxWidth="md" sx={{ height: '100%' }}>
-        {username && <Header onClickImport={() => toggleDrawer(true)} />}
+        {username && <Header onClickImport={() => toggleDrawer(true)} onClickConfig={() => setConfigDialog(true)} />}
 
-        <Drawer open={drawer} anchor="right" onClose={() => toggleDrawer(false)}>
-            <Box sx={{ width: 250 }} role="presentation">
-                <List
-                    subheader={
-                        <ListSubheader sx={{
-                            background: theme.palette.secondary.main
-                        }} component="div">
-                            Importation des fichiers
-                        </ListSubheader>
-                    }>
+        <ImporationDrawer open={drawer} onClose={() => toggleDrawer(false)}/>
 
-                    {pictures.filter(p => p.filename).map(p =>
-                        <ListItem key={p.id} disablePadding>
-                            <ListItemButton>
-                                <ListItemIcon>
-                                    {p.state === 'PENDING' && <CircularProgress />}
-                                    {p.state === 'DONE' && <DoneIcon />}
-                                    {p.state === 'FAILED' && <CloseIcon />}
-                                </ListItemIcon>
-
-                                <ListItemText sx={{wordBreak: 'break-all'}} primary={`${p.filename}`} />
-                            </ListItemButton>
-                        </ListItem>)}
-
-                    {!pictures.some(p => p.filename) && <p>
-                        <Typography fontStyle="italic" marginLeft={"1rem"} variant="caption" display="block" gutterBottom>
-                            Aucune image importée
-                        </Typography>
-                    </p>}
-                </List>
-            </Box>
-        </Drawer>
+        <ConfigurationDialog open={configDialog} onClose={() => setConfigDialog(false)}/>
 
         <Snackbar open={openNotification} autoHideDuration={6000} onClose={handleCloseNotification}>
             <Alert
