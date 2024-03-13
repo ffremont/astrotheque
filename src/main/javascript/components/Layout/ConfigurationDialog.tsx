@@ -4,6 +4,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { useFetch } from "../../hooks/useFetch";
 import { Config } from "../../types/Config";
+import { useAstrotheque } from "../../hooks/useAstrotheque";
 
 type ConfigurationDialogProps = {
     open: boolean,
@@ -29,6 +30,7 @@ export const ConfigurationDialog = ({ open, onClose }: ConfigurationDialogProps)
         }
     });
     const myFetch = useFetch();
+    const {setNotification} = useAstrotheque();
 
     useEffect(() => {
         if(open === true){
@@ -40,7 +42,24 @@ export const ConfigurationDialog = ({ open, onClose }: ConfigurationDialogProps)
         }
     }, [open]);
 
-    const onSubmit: SubmitHandler<Inputs> = (data) => { }
+    const onSubmit: SubmitHandler<Inputs> = (data) => {
+            myFetch.patch('/api/config', data)
+            .then(() => {
+                setNotification({
+                    type: 'success',
+                    title:'Réglages mis à jour',
+                    message:'Vos modifications ont été enregistrées.'
+                })
+            }) .catch(() => {
+                setNotification({
+                    type: 'error',
+                    title:'Réglages non mis à jour',
+                    message:'Une erreur est survenue lors de l\'enregistrement. Veuillez réitérer.'
+                })
+            })
+            .finally(onClose);
+     }
+
     return (<Dialog
         fullScreen
         open={open}

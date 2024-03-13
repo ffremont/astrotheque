@@ -6,7 +6,8 @@
     <artifactId>astrotheque</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>astrotheque</name>
-    <description>Photothèque en Astronomie</description>
+    <description>Photothèque en Astronomie Dans le stockage de manière autonome, des photographies astronomiques.
+    </description>
     <properties>
         <java.version>21</java.version>
         <maven.compiler.source>21</maven.compiler.source>
@@ -114,32 +115,46 @@
         </dependency>
     </dependencies>
 
+    <!--profiles>
+        <profile>
+            <id>macos</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.github.fvarrui</groupId>
+                        <artifactId>javapackager</artifactId>
+                        <version>1.7.5</version>
+                        <executions>
+                            <execution>
+                                <id>macos-installer</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>package</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>com.github.ffremont.astrotheque.AstrothequeApplication</mainClass>
+
+                                    <bundleJre>true</bundleJre>
+                                    <generateInstaller>true</generateInstaller>
+                                    <administratorRequired>false</administratorRequired>
+                                    <platform>mac</platform>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles-->
+
     <build>
         <finalName>${project.name}</finalName>
         <plugins>
-            <plugin>
-                <groupId>io.github.fvarrui</groupId>
-                <artifactId>javapackager</artifactId>
-                <version>1.7.5</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>package</goal>
-                        </goals>
-                        <configuration>
-                            <!-- mandatory -->
-                            <mainClass>com.github.ffremont.astrotheque.AstrothequeApplication</mainClass>
-                            <!-- optional -->
-                            <bundleJre>true</bundleJre>
-                            <generateInstaller>false</generateInstaller>
-                            <administratorRequired>false</administratorRequired>
-                            <platform>mac</platform>
-
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -157,6 +172,16 @@
                                     <mainClass>com.github.ffremont.astrotheque.AstrothequeApplication</mainClass>
                                 </transformer>
                             </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>

@@ -5,30 +5,10 @@
   <artifactId>astrotheque</artifactId>
   <name>astrotheque</name>
   <version>0.0.1-SNAPSHOT</version>
-  <description>Photothèque en Astronomie</description>
+  <description>Photothèque en Astronomie Dans le stockage de manière autonome, des photographies astronomiques.</description>
   <build>
     <finalName>${project.name}</finalName>
     <plugins>
-      <plugin>
-        <groupId>io.github.fvarrui</groupId>
-        <artifactId>javapackager</artifactId>
-        <version>1.7.5</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>package</goal>
-            </goals>
-            <configuration>
-              <mainClass>com.github.ffremont.astrotheque.AstrothequeApplication</mainClass>
-              <bundleJre>true</bundleJre>
-              <generateInstaller>false</generateInstaller>
-              <administratorRequired>false</administratorRequired>
-              <platform>mac</platform>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
         <version>3.5.1</version>
@@ -44,6 +24,16 @@
                   <mainClass>com.github.ffremont.astrotheque.AstrothequeApplication</mainClass>
                 </transformer>
               </transformers>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
             </configuration>
           </execution>
         </executions>

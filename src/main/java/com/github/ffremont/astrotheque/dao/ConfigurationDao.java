@@ -11,8 +11,9 @@ import com.github.ffremont.astrotheque.service.model.Configuration;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import static java.nio.file.StandardOpenOption.CREATE;
 
 public class ConfigurationDao {
 
@@ -33,7 +34,7 @@ public class ConfigurationDao {
     synchronized public Configuration write(Configuration config) {
         try {
             byte[] cryptedData = CryptUtils.crypt(JSON.writeValueAsBytes(config), dynamicProperties.getSecret());
-            Files.write(location, cryptedData, CREATE_NEW);
+            Files.write(location, cryptedData, CREATE, StandardOpenOption.WRITE);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

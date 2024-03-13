@@ -40,7 +40,7 @@ export const ImporationDrawer = ({open, onClose}: ImportationDrawerProps) => {
                     </ListItemButton>
                 </ListItem>)}
 
-            {!pictures.some(p => p.filename) && <p>
+            {recentPictures(pictures).length === 0 && <p>
                 <Typography fontStyle="italic" marginLeft={"1rem"} variant="caption" display="block" gutterBottom>
                     Aucune image importée
                 </Typography>

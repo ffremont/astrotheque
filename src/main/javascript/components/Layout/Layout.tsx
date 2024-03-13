@@ -1,4 +1,4 @@
-import { Alert, Box, CircularProgress, Container, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Snackbar, Typography } from "@mui/material"
+import { Alert,  Container,  Snackbar } from "@mui/material"
 import { Outlet, useLocation, useNavigate } from "react-router-dom"
 import { Header } from "./Header";
 import { useEffect, useState } from "react";
@@ -9,12 +9,14 @@ import { Me } from "../../types/Me";
 import { useAstrotheque } from "../../hooks/useAstrotheque";
 import { ImporationDrawer } from "./ImportationDrawer";
 import { ConfigurationDialog } from "./ConfigurationDialog";
+import { ProfilDialog } from "./ProfilDialog";
 
 export const Layout = () => {
     const { username, setUsername, notification } = useAstrotheque();
     const [openNotification, setOpenNotification] = useState(false);
     
     const [configDialog, setConfigDialog] = useState(false);
+    const [profilDialog, setProfilDialog] = useState(false);
     const [drawer, toggleDrawer] = useState(false);
     let location = useLocation();
     const navigate = useNavigate();
@@ -56,11 +58,16 @@ export const Layout = () => {
     }, [notification])
 
     return (<Container maxWidth="md" sx={{ height: '100%' }}>
-        {username && <Header onClickImport={() => toggleDrawer(true)} onClickConfig={() => setConfigDialog(true)} />}
+        {username && <Header 
+        onClickImport={() => toggleDrawer(true)} 
+        onClickConfig={() => setConfigDialog(true)}
+        onClickProfil={() => setProfilDialog(true)}
+         />}
 
         <ImporationDrawer open={drawer} onClose={() => toggleDrawer(false)}/>
 
         <ConfigurationDialog open={configDialog} onClose={() => setConfigDialog(false)}/>
+        <ProfilDialog open={profilDialog} onClose={() => setProfilDialog(false)}/>
 
         <Snackbar open={openNotification} autoHideDuration={6000} onClose={handleCloseNotification}>
             <Alert

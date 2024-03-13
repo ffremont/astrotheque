@@ -52,7 +52,7 @@ public class FrontendContext implements HttpHandler {
                 log.debug("Retour de la page index");
                 OutputStream outputStream = exchange.getResponseBody();
                 exchange.getResponseHeaders().add("Content-Type", "text/html");
-                exchange.sendResponseHeaders(200, indexHtml.length());
+                exchange.sendResponseHeaders(200, indexHtml.getBytes().length);
                 outputStream.write(indexHtml.getBytes());
                 outputStream.flush();
                 outputStream.close();

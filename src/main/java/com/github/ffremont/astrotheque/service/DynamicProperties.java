@@ -20,7 +20,7 @@ public class DynamicProperties {
     private final String secret;
 
     public DynamicProperties() {
-        this.secret = Optional.ofNullable(System.getenv("SECRET")).orElseThrow();
+        this.secret = Optional.ofNullable(System.getenv("SECRET")).orElseThrow(() -> new IllegalArgumentException("env SECRET nécessaire"));
         this.dataDir = Paths.get(Optional.ofNullable(System.getenv("DATA_DIR")).filter(not(String::isEmpty)).orElse("./"));
         this.astrometryNovaBaseUrl = Optional.ofNullable(System.getenv("ASTROMETRY_NOVA_BASEURL")).orElse("https://nova.astrometry.net");
         this.port = Optional.ofNullable(System.getenv("PORT")).map(Integer::valueOf).orElse(8080);

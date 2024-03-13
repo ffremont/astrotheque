@@ -14,6 +14,7 @@ import com.github.ffremont.astrotheque.service.model.Picture;
 import com.github.ffremont.astrotheque.web.*;
 import com.github.ffremont.astrotheque.web.model.Empty;
 import com.github.ffremont.astrotheque.web.model.LoginRequest;
+import com.github.ffremont.astrotheque.web.model.NewPassword;
 import com.sun.net.httpserver.HttpServer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,19 +42,22 @@ public class AstrothequeApplication {
         /**
          * PICTURE_DIR
          */
-        HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
-        server.setExecutor(Executors.newFixedThreadPool(
-                Optional.ofNullable(System.getenv("WEB_THREAD_POOL")).map(Integer::valueOf).orElse(10)
-        ));
+
         final var ioc = new IoC();
 
         ioc.load(DynamicProperties.class, DeepSkyCatalogDAO.class, PictureDAO.class, AccountService.class);
+        var dynamicProperties = ioc.get(DynamicProperties.class);
         var pictureRessource = ioc.get(PictureResource.class);
         var imageResource = ioc.get(ImageResource.class);
         var loginResource = ioc.get(LoginResource.class);
         var meResource = ioc.get(MeResource.class);
         var confResource = ioc.get(ConfigurationResource.class);
         var obsResource = ioc.get(ObservationResource.class);
+
+        HttpServer server = HttpServer.create(new InetSocketAddress(dynamicProperties.getPort()), 0);
+        server.setExecutor(Executors.newFixedThreadPool(
+                Optional.ofNullable(System.getenv("WEB_THREAD_POOL")).map(Integer::valueOf).orElse(10)
+        ));
 
         server.createContext("/", ioc.get(FrontendContext.class));
         server.createContext("/login", SimpleContext.with(
@@ -74,6 +78,7 @@ public class AstrothequeApplication {
                         get("/config", confResource::getConfig),
                         patch("/config", confResource::updateConfig, Configuration.class),
                         get("/me", meResource::myProfil),
+                        put("/me/password", meResource::updatePassword, NewPassword.class),
                         get("/pictures$", pictureRessource::all),
                         get("/pictures/([\\w\\-]+)$", pictureRessource::get),
                         delete("/pictures/([\\w\\-]+)", pictureRessource::delete),
@@ -86,7 +91,7 @@ public class AstrothequeApplication {
                 ))
                 .setAuthenticator(ioc.get(AstroAuthenticator.class));
 
-        log.info("Astrotheque started !");
+        log.info("Astrotheque started " + dynamicProperties.getPort());
         server.start();
     }
 

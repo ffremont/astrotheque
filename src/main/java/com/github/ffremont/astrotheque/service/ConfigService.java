@@ -42,13 +42,29 @@ public class ConfigService {
         return config;
     }
 
-    public synchronized void update(Configuration newConfig) {
+    synchronized public void update(Configuration newConfig) {
         Configuration config = getConfiguration();
 
         dao.write(config.toBuilder()
                 .baseurl(newConfig.baseurl())
                 .astrometryNovaApikey(newConfig.astrometryNovaApikey())
                 .build());
+    }
+
+    synchronized public void changePassword(String accountName, String actualPassword, String newPassword) {
+        Configuration config = getConfiguration();
+
+        AccountService accountService = ioc.get(AccountService.class);
+        if (!accountService.verifiedPasswordOf(accountName, actualPassword)) {
+            throw new IllegalArgumentException("Actual password invalid for " + actualPassword);
+        }
+        var newHashPassword = accountService.hashPwd(newPassword);
+        dao.write(config.toBuilder()
+                .admin(config.admin().toBuilder()
+                        .pwd(newHashPassword)
+                        .build())
+                .build());
+        accountService.register(accountName, newHashPassword);
     }
 
 

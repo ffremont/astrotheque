@@ -82,6 +82,13 @@ public class AccountService implements StartupListener {
         return new String(BCrypt.withDefaults().hashToChar(12, password.toCharArray()));
     }
 
+    public boolean verifiedPasswordOf(String login, String pwd) {
+        String bcryptExpectPwd = dao.findByName(login).pwd();
+        BCrypt.Result result = BCrypt.verifyer().verify(pwd.toCharArray(), bcryptExpectPwd);
+
+        return result.verified;
+    }
+
     /**
      * Tentative de connexion
      *
@@ -89,10 +96,7 @@ public class AccountService implements StartupListener {
      * @param pwd
      */
     public Jwt tryLogin(String login, String pwd) {
-        String bcryptExpectPwd = dao.findByName(login).pwd();
-        BCrypt.Result result = BCrypt.verifyer().verify(pwd.toCharArray(), bcryptExpectPwd);
-
-        boolean pwdOkay = result.verified;
+        boolean pwdOkay = verifiedPasswordOf(login, pwd);
 
         if (!pwdOkay) {
             if (attempts.get(login).incrementAndGet() > LEVEL_WAIT) {

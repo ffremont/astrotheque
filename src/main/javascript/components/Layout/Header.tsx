@@ -7,6 +7,7 @@ import { useAstrotheque } from "../../hooks/useAstrotheque";
 import { useFetch } from "../../hooks/useFetch";
 import { useNavigate } from "react-router-dom";
 import { Picture } from "../../types/Picture";
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import logo from '../../assets/icon512_rounded.png';
 import { REFRESH_PICTURES_INTERVAL } from "../../constant";
 import { recentPictures } from "../../utils/picturesFilters";
@@ -14,11 +15,12 @@ import { recentPictures } from "../../utils/picturesFilters";
 type HeaderProps = {
     onClickImport: () => void
     onClickConfig: () => void
+    onClickProfil: () => void
 }
 
 type BadgeState = 'info' | 'warning' | 'error'
 
-export const Header = ({ onClickImport, onClickConfig }: HeaderProps) => {
+export const Header = ({ onClickImport, onClickConfig, onClickProfil }: HeaderProps) => {
     const { username, pictures, setPictures } = useAstrotheque();
     const myFetch = useFetch();
     const navigate = useNavigate();
@@ -66,6 +68,11 @@ export const Header = ({ onClickImport, onClickConfig }: HeaderProps) => {
     const handleConfig = () => {
         setAnchorEl(null);
         onClickConfig();
+    }
+
+    const handleProfil = () => {
+        setAnchorEl(null);
+        onClickProfil();
     }
 
     const handleLogout = () => {
@@ -130,6 +137,12 @@ export const Header = ({ onClickImport, onClickConfig }: HeaderProps) => {
                             <Settings fontSize="small" />
                         </ListItemIcon>
                         Réglages
+                    </MenuItem>
+                    <MenuItem onClick={handleProfil}>
+                        <ListItemIcon>
+                            <AccountCircleIcon fontSize="small" />
+                        </ListItemIcon>
+                        Profil
                     </MenuItem>
                     <MenuItem onClick={handleLogout}>
                         <ListItemIcon>
