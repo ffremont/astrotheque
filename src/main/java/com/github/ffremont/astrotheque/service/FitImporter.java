@@ -117,8 +117,8 @@ public class FitImporter implements Runnable {
 
                     var info = astrometryDAO.info(jobId.get());
                     if (!"success".equals(info.status())) {
-                        log.info("{} / ❌ failed to get info of job {}", owner, jobId.get());
-                        continue;
+                        log.info("{} / ❌ failed to get info of job {}, current status : {}", owner, jobId.get(), info.status());
+                        throw new RuntimeException(" ❌ Job invalid status :" + info.status());
                     } else {
                         log.info("{} / ✅ getting info of job {}", owner, jobId.get());
                     }
@@ -137,7 +137,7 @@ public class FitImporter implements Runnable {
                         Path previewFile = Files.createTempFile("astrotheque_", ".jpg");
                         FileUtils.copyInputStreamToFile(astrometryDAO.getImage(astroNovaImage), previewFile.toFile());
                         preview = Optional.of(new PreviewData(previewFile, previewFile.toFile().getName()));
-                        
+
                         log.info("{} / ⚙️ Building thumb...", owner);
                         Thumbnails.of(Files.newInputStream(previewFile))
                                 .size(512, 512)

@@ -94,7 +94,7 @@ public class AstrometryDAO {
                     .build();
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(STR."\{this.baseurl}/api/upload"))
+                    .uri(new URI(baseurl + "/api/upload"))
                     .timeout(Duration.ofMinutes(5))
                     .headers("Content-Type", "multipart/form-data")
                     .POST(multipartBody)

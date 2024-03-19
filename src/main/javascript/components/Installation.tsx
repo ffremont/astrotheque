@@ -44,6 +44,7 @@ export const Installation = () => {
                     pwd: data.adminPwd
                 }
             }).then(() => navigate('/'))
+            .catch(() => alert('Une erreur est survenue, veuillez réessayer.'))
         }
     }
 

@@ -17,6 +17,7 @@ import static java.nio.file.StandardOpenOption.CREATE;
 
 public class ConfigurationDao {
 
+
     public final static String CONFIG_FILENAME = "configuration.enc";
 
     private final static ObjectMapper JSON = new ObjectMapper()
@@ -31,7 +32,7 @@ public class ConfigurationDao {
         this.location = dynamicProperties.getDataDir().resolve(CONFIG_FILENAME);
     }
 
-    synchronized public Configuration write(Configuration config) {
+    public Configuration write(Configuration config) {
         try {
             byte[] cryptedData = CryptUtils.crypt(JSON.writeValueAsBytes(config), dynamicProperties.getSecret());
             Files.write(location, cryptedData, CREATE, StandardOpenOption.WRITE);

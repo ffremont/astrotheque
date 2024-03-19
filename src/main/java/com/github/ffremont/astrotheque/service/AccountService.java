@@ -12,6 +12,8 @@ import com.github.ffremont.astrotheque.service.model.Configuration;
 import com.github.ffremont.astrotheque.service.model.Jwt;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -47,6 +49,15 @@ public class AccountService implements StartupListener {
 
     @Override
     public void onStartup(IoC ioC) {
+        var dataDir = this.ioc.get(DynamicProperties.class).getDataDir();
+        if (!dataDir.toFile().exists()) {
+            try {
+                Files.createDirectories(dataDir);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         log.debug("Initialisation des comptes utilisateurs à 0 tentatives de connexion");
         Configuration config = ioC.get(ConfigService.class).getConfiguration();
         Optional.ofNullable(config).ifPresent(c -> {
@@ -57,6 +68,7 @@ public class AccountService implements StartupListener {
         List<Account> accountNames = dao.getAccounts();
         accountNames.forEach(account -> attempts.put(account.name(), new AtomicInteger(0)));
     }
+
 
     public Account register(String login, String pwd) {
         Account acc = dao.register(login, pwd);

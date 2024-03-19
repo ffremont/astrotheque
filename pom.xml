@@ -115,7 +115,7 @@
         </dependency>
     </dependencies>
 
-    <!--profiles>
+    <profiles>
         <profile>
             <id>macos</id>
             <activation>
@@ -125,10 +125,26 @@
             </activation>
             <build>
                 <plugins>
-                    <plugin>
+                    <!--plugin>
                         <groupId>io.github.fvarrui</groupId>
                         <artifactId>javapackager</artifactId>
                         <version>1.7.5</version>
+                        <configuration>
+                            <name>Astrothèque</name>
+                            <organizationName>Florent FREMONT</organizationName>
+                            <organizationEmail>ff.fremont.florent@gmail.com</organizationEmail>
+                            <description>Application de gestion de photos astronomique.</description>
+                            <mainClass>com.github.ffremont.astrotheque.AstrothequeApplication</mainClass>
+                            <bundleJre>true</bundleJre>
+                            <generateInstaller>false</generateInstaller>
+                            <administratorRequired>false</administratorRequired>
+                            <platform>auto</platform>
+                            <url>http://localhost:8080</url>
+                            <additionalResources>
+                                <additionalResource>${basedir}/dbs</additionalResource>
+                                <additionalResource>${basedir}/dist</additionalResource>
+                            </additionalResources>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>macos-installer</id>
@@ -137,20 +153,55 @@
                                     <goal>package</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>com.github.ffremont.astrotheque.AstrothequeApplication</mainClass>
+                                    <winConfig>
+                                        <icoFile>${basedir}/src/main/javascript/assets/icon512_rounded.ico</icoFile>
+                                    </winConfig>
+                                    <macConfig>
+                                        <relocateJar>false</relocateJar>
+                                        <generateDmg>false</generateDmg>
+                                        <icnsFile>${basedir}/src/main/javascript/assets/icon512_rounded.icns</icnsFile>
+                                        <appId>astrotheque-ffremont</appId>
+                                    </macConfig>
 
-                                    <bundleJre>true</bundleJre>
-                                    <generateInstaller>true</generateInstaller>
-                                    <administratorRequired>false</administratorRequired>
-                                    <platform>mac</platform>
                                 </configuration>
                             </execution>
+                        </executions>
+                    </plugin-->
+                    <plugin>
+                        <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                        <artifactId>launch4j-maven-plugin</artifactId>
+                        <version>2.5.0</version>
+                        <executions>
+                            <execution>
+                                <id>l4j-clui</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>launch4j</goal>
+                                </goals>
+                                <configuration>
+                                    <headerType>console</headerType>
+                                    <jar>target/astrotheque.jar</jar>
+                                    <errTitle>encc</errTitle>
+                                    <classPath>
+                                        <mainClass>com.github.ffremont.astrotheque.AstrothequeApplication</mainClass>
+                                    </classPath>
+                                    <jre>
+                                        <minVersion>21</minVersion>
+                                    </jre>
+                                    <versionInfo>
+                                        <txtFileVersion>txt file version?</txtFileVersion>
+                                        <fileDescription>a description</fileDescription>
+                                        <copyright>my copyright</copyright>
+                                    </versionInfo>
+                                </configuration>
+                            </execution>
+
                         </executions>
                     </plugin>
                 </plugins>
             </build>
         </profile>
-    </profiles-->
+    </profiles>
 
     <build>
         <finalName>${project.name}</finalName>
@@ -199,7 +250,6 @@
                             <version>1.18.30</version>
                         </path>
                     </annotationProcessorPaths>
-                    <compilerArgs>--enable-preview</compilerArgs>
                 </configuration>
             </plugin>
 

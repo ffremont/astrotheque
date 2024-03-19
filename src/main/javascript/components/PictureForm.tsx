@@ -12,7 +12,7 @@ import { useAstrotheque } from "../hooks/useAstrotheque";
 
 export const PictureForm = () => {
     let { id } = useParams();
-    const {setNotification } = useAstrotheque();
+    const { setNotification } = useAstrotheque();
     const navigate = useNavigate();
     const myFetch = useFetch();
     const [loading, setLoading] = useState(false);
@@ -37,12 +37,12 @@ export const PictureForm = () => {
             }
 
         });
-        myFetch.put(`/api/pictures/${id}`,data)
+        myFetch.put(`/api/pictures/${id}`, data)
             .then(r => {
                 navigate('/');
                 setNotification({
-                    type:'success',
-                    title:`Succès de la mise à jour`,
+                    type: 'success',
+                    title: `Succès de la mise à jour`,
                     message: `Photo astro "${id}" modifiée.`
                 })
             }).catch(e => {
@@ -63,9 +63,9 @@ export const PictureForm = () => {
                 <Typography align="left" sx={{ fontWeight: "bold" }} gutterBottom>
                     Astres
                 </Typography>
-                
+
                 <TextField
-                className="field"
+                    className="field"
                     autoFocus
                     margin="dense"
                     required
@@ -162,7 +162,7 @@ export const PictureForm = () => {
                     name="exposure"
                     className="field"
                     inputProps={{
-                        step:"0.01"
+                        step: "0.01"
                     }}
                     fullWidth
                     defaultValue={picture.exposure}
@@ -250,20 +250,37 @@ export const PictureForm = () => {
                 />
             </Paper>
 
-            <Box className="form-actions">
-            <Button>Annuler</Button>
-            <Button type="submit" disabled={loading} variant="contained">Mettre à jour</Button>
-            {loading && (
-                <CircularProgress
-                    size={24}
-                    sx={{
-                        color: blue[500],
-                        marginTop: '6px',
-                        marginLeft: '-83px'
+            <Paper className="form-section">
+                <TextField
+                    margin="dense"
+                    label="Note"
+                    type="text"
+                    fullWidth
+                    multiline
+                    rows={4}
+                    inputProps={{
+                        maxLength: 2048
                     }}
+                    name="note"
+                    defaultValue={picture.note}
+                    variant="standard"
                 />
-            )}
-        </Box>
+            </Paper>
+
+            <Box className="form-actions">
+                <Button>Annuler</Button>
+                <Button type="submit" disabled={loading} variant="contained">Mettre à jour</Button>
+                {loading && (
+                    <CircularProgress
+                        size={24}
+                        sx={{
+                            color: blue[500],
+                            marginTop: '6px',
+                            marginLeft: '-83px'
+                        }}
+                    />
+                )}
+            </Box>
         </>}
 
 

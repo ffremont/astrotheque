@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.ffremont.astrotheque.core.IoC;
-import com.github.ffremont.astrotheque.core.StartupListener;
 import com.github.ffremont.astrotheque.service.DynamicProperties;
 import com.github.ffremont.astrotheque.service.model.Belong;
 import com.github.ffremont.astrotheque.service.model.FitData;
@@ -30,7 +29,7 @@ import java.util.stream.Stream;
 import static java.nio.file.Files.walk;
 
 @Slf4j
-public class PictureDAO implements StartupListener {
+public class PictureDAO {
 
     public final static String THUMB_FILENAME = "thumb.jpg";
     public final static String RAW_FILENAME = "raw.fit";
@@ -88,17 +87,6 @@ public class PictureDAO implements StartupListener {
             log.debug("Astrothèque chargée !");
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void onStartup(IoC ioc) {
-        if (!dataDir.toFile().exists()) {
-            try {
-                Files.createDirectories(dataDir);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 

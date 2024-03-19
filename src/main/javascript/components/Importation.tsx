@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Card, CardContent, CardMedia, CircularProgress, NativeSelect, Paper, TextField, Typography } from "@mui/material"
+import { Alert, Box, Button, Card, CardContent, CardMedia, Checkbox, CircularProgress, FormControl, FormControlLabel, FormGroup, FormLabel, NativeSelect, Paper, Radio, RadioGroup, TextField, Typography } from "@mui/material"
 import obs from '../assets/obs.jpeg'
 import { SubmitHandler, useForm } from "react-hook-form"
 import { useLocalStorage } from "usehooks-ts"
@@ -13,10 +13,11 @@ type Inputs = {
     instrument: string,
     corrred: string,
     location: string
+    nature: string
 }
 
 type Issue = {
-    title:string,
+    title: string,
     message: string
 }
 
@@ -25,15 +26,19 @@ export const Importation = () => {
         register,
         handleSubmit,
         setValue,
+        watch,
         formState: { errors },
     } = useForm<Inputs>({
         shouldUseNativeValidation: true,
+        defaultValues:{
+            nature: 'DSO'
+        }
 
     })
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const fitFiles = useRef(null);
-    const [issue, setIssue] = useState<Issue|null>(null);
+    const [issue, setIssue] = useState<Issue | null>(null);
     const previewFiles = useRef(null);
     const myFetch = useFetch(15 * 60000);
     const [instrument, saveInstrument] = useLocalStorage("instrument", '');
@@ -42,6 +47,8 @@ export const Importation = () => {
     useEffect(() => setValue('instrument', instrument), [instrument]);
     useEffect(() => setValue('corrred', corrred), [corrred]);
     useEffect(() => setValue('location', location), [location]);
+
+    const multiple = watch('nature') === 'DSO';
 
     const onSubmit: SubmitHandler<Inputs> = (data) => {
         const form = new FormData();
@@ -54,6 +61,7 @@ export const Importation = () => {
             instrument: data.instrument,
             corrred: data.corrred
         }));
+        form.append('nature', data.nature);
         if (fitFiles.current) {
             const files: any = (fitFiles.current as HTMLElement).querySelector('input')?.files;
             for (let index = 0; index < files.length; index++) {
@@ -71,26 +79,26 @@ export const Importation = () => {
             }
         }
 
-        
-        if(totalSize > MAX_UPLOAD_SIZE){
+
+        if (totalSize > MAX_UPLOAD_SIZE) {
             setIssue({
-                title:"Téléversement",
-                message: `La taille totale de "${(totalSize/(1024*1024)).toFixed(1)}Mo" excède la limitation de ${(MAX_UPLOAD_SIZE/(1024*1024)).toFixed(0)}Mo.`
+                title: "Téléversement",
+                message: `La taille totale de "${(totalSize / (1024 * 1024)).toFixed(1)}Mo" excède la limitation de ${(MAX_UPLOAD_SIZE / (1024 * 1024)).toFixed(0)}Mo.`
             })
             return;
         }
 
-        if(!fitNames.every(filename => filename.endsWith(".fit"))){
+        if (!fitNames.every(filename => filename.endsWith(".fit"))) {
             setIssue({
-                title:"Fichiers FIT",
+                title: "Fichiers FIT",
                 message: `Certains fichiers FIT n'ont pas l'extension .fit.`
             })
             return;
         }
 
-        if(!jpgNames.every(filename => filename.endsWith(".jpg") || filename.endsWith(".jpeg"))){
+        if (!jpgNames.every(filename => filename.endsWith(".jpg") || filename.endsWith(".jpeg"))) {
             setIssue({
-                title:"Fichiers JPG",
+                title: "Fichiers JPG",
                 message: `Certains fichiers aperçus n'ont pas l'extension .jpg / .jpeg.`
             })
             return;
@@ -125,7 +133,25 @@ export const Importation = () => {
 
         <Paper className="form-section">
             <Typography align="left" sx={{ fontWeight: "bold" }} gutterBottom>
-                Fichiers FIT
+                Nature de la session
+            </Typography>
+
+            <FormControl>
+                <RadioGroup
+                    row
+                    aria-labelledby="nature"
+                    name="nature"
+                >
+                    <FormControlLabel value="DSO" control={<Radio checked={watch('nature') === 'DSO'} {...register('nature')} />} label="Ciel profond" />
+                    <FormControlLabel value="PLANET" control={<Radio checked={watch('nature') === 'PLANET'} {...register('nature')} />} label="Planète" />
+                    
+                </RadioGroup>
+            </FormControl>
+        </Paper>
+
+        <Paper className="form-section">
+            <Typography align="left" sx={{ fontWeight: "bold" }} gutterBottom>
+                Fichier{multiple ? 's': ''} FIT
             </Typography>
 
             <TextField type="file"
@@ -133,7 +159,7 @@ export const Importation = () => {
                 ref={fitFiles}
                 name="fits"
                 inputProps={{
-                    multiple: true,
+                    multiple,
                     accept: "image/fits"
                 }}
                 fullWidth label="Fichiers FITs" variant="standard" />
@@ -141,7 +167,7 @@ export const Importation = () => {
 
         <Paper className="form-section">
             <Typography align="left" sx={{ fontWeight: "bold" }} gutterBottom>
-                Fichiers Aperçu (facultatif)
+                Fichier{multiple ? 's': ''} aperçu (facultatif)
             </Typography>
             <Typography align="justify" variant="body2" gutterBottom>
                 Les fichiers doivent avoir le même nom que les fichiers FITs afin de les associer ensemble.
@@ -151,7 +177,7 @@ export const Importation = () => {
                 ref={previewFiles}
                 name="preview"
                 inputProps={{
-                    multiple: true,
+                    multiple,
                     accept: "image/jpeg,image/jpg"
                 }}
                 fullWidth label="Fichiers apercu" variant="standard" />
@@ -190,7 +216,7 @@ export const Importation = () => {
             <TextField className="form-control" fullWidth {...register("corrred", { maxLength: 256, minLength: 2 })} error={!!errors.corrred} label="Correcteur / reducteur" variant="standard" />
         </Paper>
 
-        {issue && <Alert sx={{textAlign:'left',marginBottom:'1rem'}} severity="error">
+        {issue && <Alert sx={{ textAlign: 'left', marginBottom: '1rem' }} severity="error">
             <strong>{issue.title}</strong>{' '}{issue.message}
         </Alert>}
 

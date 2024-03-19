@@ -8,7 +8,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 public class ConnectionPoolManager {
-    private static final String JDBC_URL = STR."jdbc:sqlite:\{Optional.ofNullable(System.getenv("DB_FILE")).orElse("dbs/astrotheque.db")}";
+    private static final String JDBC_URL = "jdbc:sqlite:" + Optional.ofNullable(System.getenv("DB_FILE")).orElse("dbs/astrotheque.db");
     private static final int MAX_POOL_SIZE = 10;
 
     private static final BlockingQueue<Connection> connectionPool = new ArrayBlockingQueue<>(MAX_POOL_SIZE);

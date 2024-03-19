@@ -9,6 +9,7 @@ import com.github.ffremont.astrotheque.core.httpserver.multipart.MultipartUtils;
 import com.github.ffremont.astrotheque.core.httpserver.multipart.Part;
 import com.github.ffremont.astrotheque.service.ObservationService;
 import com.github.ffremont.astrotheque.service.model.FitData;
+import com.github.ffremont.astrotheque.service.model.Nature;
 import com.github.ffremont.astrotheque.web.model.Observation;
 import com.github.ffremont.astrotheque.web.model.PreviewData;
 import com.sun.net.httpserver.HttpExchange;
@@ -38,6 +39,13 @@ public class ObservationResource implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         List<Part> parts = MultipartUtils.from(exchange, (long) (1024 * 1024 * 1000));
         try {
+            Nature nature = parts.stream().filter(part ->
+                            "nature".equals(part.name())
+                                    && Objects.nonNull(part.value())
+                    )
+                    .map(Part::value)
+                    .map(Nature::valueOf)
+                    .findFirst().orElseThrow();
             Observation obs = parts.stream().filter(part ->
                     "data".equals(part.name())
                             && Objects.nonNull(part.value())
@@ -63,7 +71,15 @@ public class ObservationResource implements HttpHandler {
                             .map(part -> new PreviewData(part.file(), part.filename()))
                             .toList()
                     ).build();
-            observationService.importObservation(exchange.getPrincipal().getUsername(), newObs);
+
+            if (Nature.DSO.equals(nature)) {
+                log.info("DSO > Importation basé sur nova astrometry");
+                observationService.importObservation(exchange.getPrincipal().getUsername(), newObs);
+            } else if (Nature.PLANET.equals(nature)) {
+                
+            } else {
+                throw new RuntimeException("Pas implémenté");
+            }
         } finally {
             //MultipartUtils.clear(parts);
             exchange.sendResponseHeaders(204, -1);

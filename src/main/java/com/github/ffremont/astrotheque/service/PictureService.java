@@ -34,7 +34,24 @@ public class PictureService {
         return picture;
     }
 
-    public Picture update(String accountName, Picture newPicture) {
+    public Picture update(String accountName, Picture picture) {
+        var originalPicture = dao.getById(accountName, picture.getId());
+
+        var newPicture = originalPicture.toBuilder()
+                .name(picture.getName())
+                .type(picture.getType())
+                .dateObs(picture.getDateObs())
+                .constellation(picture.getConstellation())
+                .camera(picture.getCamera())
+                .instrument(picture.getInstrument())
+                .tags(picture.getTags())
+                .note(picture.getNote())
+                .corrRed(picture.getCorrRed())
+                .location(picture.getLocation())
+                .moonPhase(picture.getMoonPhase())
+                .gain(picture.getGain())
+                .exposure(picture.getExposure())
+                .stackCnt(picture.getStackCnt()).build();
         dao.refresh(accountName, newPicture);
         return newPicture;
     }

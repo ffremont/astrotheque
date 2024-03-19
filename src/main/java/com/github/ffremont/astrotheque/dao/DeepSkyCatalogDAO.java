@@ -43,7 +43,7 @@ public class DeepSkyCatalogDAO {
                     }
                 }
             } catch (SQLException e) {
-                throw new RuntimeException(STR."Recherche Constellations impossible \{abr}", e);
+                throw new RuntimeException("Recherche Constellations impossible " + abr, e);
             }
         } finally {
             if (Objects.nonNull(connection)) {
@@ -82,7 +82,7 @@ public class DeepSkyCatalogDAO {
                     }
                 }
             } catch (SQLException e) {
-                throw new RuntimeException(STR."Recherche DsoEntries impossible \{name}", e);
+                throw new RuntimeException("Recherche DsoEntries impossible " + name, e);
             }
         } finally {
             if (Objects.nonNull(connection)) {

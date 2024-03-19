@@ -6,7 +6,6 @@ import com.github.ffremont.astrotheque.core.httpserver.context.SimpleContext;
 import com.github.ffremont.astrotheque.core.httpserver.route.StreamingRoute;
 import com.github.ffremont.astrotheque.core.security.AstroAuthenticator;
 import com.github.ffremont.astrotheque.dao.DeepSkyCatalogDAO;
-import com.github.ffremont.astrotheque.dao.PictureDAO;
 import com.github.ffremont.astrotheque.service.AccountService;
 import com.github.ffremont.astrotheque.service.DynamicProperties;
 import com.github.ffremont.astrotheque.service.model.Configuration;
@@ -45,7 +44,7 @@ public class AstrothequeApplication {
 
         final var ioc = new IoC();
 
-        ioc.load(DynamicProperties.class, DeepSkyCatalogDAO.class, PictureDAO.class, AccountService.class);
+        ioc.load(DynamicProperties.class, DeepSkyCatalogDAO.class, AccountService.class);
         var dynamicProperties = ioc.get(DynamicProperties.class);
         var pictureRessource = ioc.get(PictureResource.class);
         var imageResource = ioc.get(ImageResource.class);
@@ -91,7 +90,8 @@ public class AstrothequeApplication {
                 ))
                 .setAuthenticator(ioc.get(AstroAuthenticator.class));
 
-        log.info("Astrotheque started " + dynamicProperties.getPort());
+        log.info("Astrotheque démarré sur le port {}", dynamicProperties.getPort());
+        log.info("🚀 Accéder à l'interface sur http://localhost:{}", dynamicProperties.getPort());
         server.start();
     }
 

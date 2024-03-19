@@ -38,6 +38,7 @@ public class Picture implements Comparable<Picture> {
     Float ra;
     Float dec;
     Type type;
+    String note;
 
     List<String> webTags;
 

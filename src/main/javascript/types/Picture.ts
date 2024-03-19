@@ -16,6 +16,7 @@ export type Picture = {
     corrRed: string
     exposure: number
     gain: number
+    note:string
 
     stackCnt: number
     tags: string[]
