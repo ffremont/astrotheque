@@ -3,7 +3,7 @@ import { Autocomplete, Fab, InputAdornment, NativeSelect, TextField } from "@mui
 import { Box } from "@mui/system"
 import { useEffect, useState } from "react";
 import Lightbox from "yet-another-react-lightbox";
-import { Captions, Counter, Download, Share } from "yet-another-react-lightbox/plugins";
+import { Captions, Counter, Share } from "yet-another-react-lightbox/plugins";
 import { Edit } from "../libs/yet-another-react-lightbox/plugins/edit/Edit";
 import { Remove } from "../libs/yet-another-react-lightbox/plugins/remove/Remove";
 import AddIcon from '@mui/icons-material/Add';
@@ -15,8 +15,7 @@ import { fromList } from "../utils/pictureInAlbumFactory";
 import { CriteriaNames, allCriteria } from "../types/Criteria";
 import PhotoAlbum from "react-photo-album";
 import { Item } from "../types/Item";
-import { Raw } from "../libs/yet-another-react-lightbox/plugins/raw/Raw";
-import { Annotated, Note } from "../libs/yet-another-react-lightbox/plugins/note/Note";
+import {  Note } from "../libs/yet-another-react-lightbox/plugins/note/Note";
 import { useAstrotheque } from "../hooks/useAstrotheque";
 import { Binaries } from "../libs/yet-another-react-lightbox/plugins/binaries/Binaries";
 

@@ -1,7 +1,6 @@
 package com.github.ffremont.astrotheque.service;
 
 import com.github.ffremont.astrotheque.core.IoC;
-import com.github.ffremont.astrotheque.dao.PictureDAO;
 import com.github.ffremont.astrotheque.service.model.FitData;
 import com.github.ffremont.astrotheque.service.model.Picture;
 import com.github.ffremont.astrotheque.service.model.PictureState;
@@ -24,7 +23,6 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class ObservationService {
 
-    private final PictureDAO pictureDAO;
 
     private final FitMapper fitMapper = new FitMapper();
     private static final ExecutorService FIT_IMPORT_THREAD_POOL = Executors.newFixedThreadPool(1);
@@ -34,17 +32,24 @@ public class ObservationService {
 
 
     public ObservationService(IoC ioC) {
-        this.pictureDAO = ioC.get(PictureDAO.class);
         this.pictureService = ioC.get(PictureService.class);
         this.moonService = ioC.get(MoonService.class);
         this.ioc = ioC;
     }
 
+
+    /**
+     * Extrait des fichiers .FIT les méta données
+     *
+     * @param accountName
+     * @param paths
+     * @return
+     */
     public List<FitData> extractFitData(String accountName, List<Map.Entry<String, Path>> paths) {
         return paths.stream()
                 .filter(file -> file.getValue().getFileName().toString().endsWith(".fit"))
                 .map(fitMapper)
-                .filter(fit -> !pictureDAO.has(accountName, fit.getHash()))
+                .filter(fit -> !pictureService.has(accountName, fit.getHash()))
                 .toList();
     }
 
@@ -53,9 +58,8 @@ public class ObservationService {
      *
      * @param accountName
      * @param observation
-     * @return
      */
-    public Observation newPlanetSatelliteObservation(String accountName, Observation observation) {
+    public void newPlanetSatelliteObservation(String accountName, Observation observation) {
         log.info("{} / 🔭 Nouvelle observation planète ou satellite", accountName);
 
         var fit = observation.fits().stream().findFirst().orElseThrow();
@@ -101,15 +105,14 @@ public class ObservationService {
             throw new RuntimeException(accountName + " / thumb génération impossible", e);
         }
 
-        return observation;
     }
 
 
-    public Observation newDsoObservation(String accountName, Observation obs) {
+    public void newDsoObservation(String accountName, Observation obs) {
         Observation newObs = obs.toBuilder().id(UUID.randomUUID().toString()).build();
 
         // persist ids
-        pictureDAO.allocate(accountName, newObs);
+        pictureService.allocate(accountName, newObs);
 
         //background
         FIT_IMPORT_THREAD_POOL.submit(new FitImporter(
@@ -118,6 +121,5 @@ public class ObservationService {
                 ioc.get(ConfigService.class).getConfiguration().astrometryNovaApikey(),
                 accountName));
 
-        return newObs;
     }
 }

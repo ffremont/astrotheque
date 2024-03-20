@@ -36,11 +36,11 @@ Une fois l'application installée, il vous faudra y **accéder avec votre naviga
 
 ### Poste local
 
-L'application est pourvue d'un instaleur pour **mac** et **windows**, permettant une installation et une mise à jour
+L'application est pourvue d'un lançeur pour **mac** et **windows**, permettant une installation et une mise à jour
 facilitée.
-L'ensemble des données seront stockées dans **votre répertoire utilisateur, dans "Astrotheque"**.
+L'ensemble des données seront stockées dans **votre répertoire utilisateur, dans "astrotheque"**.
 
-🌎 👉**Adresse** : http://localhost:99999
+🌎 👉**Adresse d'accès** : http://localhost:99999
 
 Pour plus de fiabilité, vous pouvez synchroniser ce répertoire avec le cloud de votre choix.
 
@@ -49,13 +49,17 @@ Pour plus de fiabilité, vous pouvez synchroniser ce répertoire avec le cloud d
 En mode serveur basé sur Docker est disponible afin de pouvoir disposer d'une instance personnalisée.
 
 * Récupérer l'image [floorent/astrotheque](https://hub.docker.com/r/floorent/astrotheque)
+* Personnaliser `SECRET` / `DATA_DIR`
 * Déployer là sur votre serveur
+
+🔐👋 Générer une clef `SECRET`"**aes-256-cbc-hmac-sha256**", rendez-vous
+sur [generate-random.org](https://generate-random.org/encryption-key-generator?count=1&bytes=32&cipher=aes-256-cbc-hmac-sha256&string=&password=)
 
 ### Configuration
 
 Pour configurer l'application, vous pouvez utiliser des variables d'environnement :
 
-- `SECRET`: **OBLIGATOIRE**, Clé secrète pour l'application nécessaire au chiffrage de la configuration.
+- `SECRET`: Clé secrète pour l'application nécessaire au chiffrage de la configuration. Format aes-256-cbc-hmac-sha256.
 - `DATA_DIR`: Répertoire de données pour stocker les photographies astronomiques. Par défaut, `~/astrotheque`.
 - `WEB_THREAD_POOL`: Taille du pool de thread web. Par défaut `10`.
 - `ASTROMETRY_NOVA_BASEURL`: URL de base pour Astrometry Nova. Par défaut, `https://nova.astrometry.net`.

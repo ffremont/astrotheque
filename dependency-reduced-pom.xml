@@ -101,45 +101,6 @@
       </plugin>
     </plugins>
   </build>
-  <profiles>
-    <profile>
-      <id>macos</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>com.akathist.maven.plugins.launch4j</groupId>
-            <artifactId>launch4j-maven-plugin</artifactId>
-            <version>2.5.0</version>
-            <executions>
-              <execution>
-                <id>l4j-clui</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>launch4j</goal>
-                </goals>
-                <configuration>
-                  <headerType>console</headerType>
-                  <jar>target/astrotheque.jar</jar>
-                  <errTitle>encc</errTitle>
-                  <classPath>
-                    <mainClass>com.github.ffremont.astrotheque.AstrothequeApplication</mainClass>
-                  </classPath>
-                  <jre>
-                    <minVersion>21</minVersion>
-                  </jre>
-                  <versionInfo>
-                    <txtFileVersion>txt file version?</txtFileVersion>
-                    <fileDescription>a description</fileDescription>
-                    <copyright>my copyright</copyright>
-                  </versionInfo>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
   <dependencies>
     <dependency>
       <groupId>org.projectlombok</groupId>

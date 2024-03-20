@@ -3,10 +3,10 @@ package com.github.ffremont.astrotheque.service;
 import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.dao.PictureDAO;
 import com.github.ffremont.astrotheque.service.model.Picture;
+import com.github.ffremont.astrotheque.web.model.Observation;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.UUID;
 
 public class PictureService {
 
@@ -40,12 +40,12 @@ public class PictureService {
         return picture;
     }
 
-    public Picture add(String accountName, Picture picture) {
-        var newPicture = picture.toBuilder()
-                .id(UUID.randomUUID().toString())
-                .build();
-        dao.refresh(accountName, newPicture);
-        return newPicture;
+    public void allocate(String owner, Observation obs) {
+        dao.allocate(owner, obs);
+    }
+
+    public boolean has(String owner, String hashOfRaw) {
+        return dao.has(owner, hashOfRaw);
     }
 
     public void save(String owner, Picture picture, InputStream jpg, InputStream thumb, InputStream raw, InputStream annotated) {

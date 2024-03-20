@@ -25,6 +25,8 @@ import java.util.Objects;
 @Slf4j
 public class ObservationResource implements HttpHandler {
 
+    private final static Long MAX_UPLOAD = (long) (1024 * 1024 * 1000);
+
     private final static ObjectMapper JSON = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .registerModule(new JavaTimeModule());
@@ -38,7 +40,7 @@ public class ObservationResource implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        List<Part> parts = MultipartUtils.from(exchange, (long) (1024 * 1024 * 1000));
+        List<Part> parts = MultipartUtils.from(exchange, MAX_UPLOAD);
         try {
             Nature nature = parts.stream().filter(part ->
                             "nature".equals(part.name())
@@ -65,6 +67,10 @@ public class ObservationResource implements HttpHandler {
                             .filter(part -> "fits".equals(part.name()) && Objects.nonNull(part.file()))
                             .map(part -> Map.entry(part.filename(), part.file()))
                             .toList());
+            if (fits.isEmpty()) {
+                throw new RuntimeException("Il doit y avoir des fichiers fit");
+            }
+
             Observation newObs = obs.toBuilder()
                     .fits(fits)
                     .previews(parts.stream()

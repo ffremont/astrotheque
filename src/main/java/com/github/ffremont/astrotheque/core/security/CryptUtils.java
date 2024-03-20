@@ -1,12 +1,10 @@
 package com.github.ffremont.astrotheque.core.security;
 
 import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
@@ -21,7 +19,10 @@ public class CryptUtils {
 
     public static String generateKey() {
         try {
-            SecretKey secret = KeyGenerator.getInstance("AES").generateKey();
+            KeyGenerator keygen = KeyGenerator.getInstance("AES");
+            keygen.init(256);
+            SecretKey secret = keygen.generateKey();
+
             // get base64 encoded version of the key
             return Base64.getEncoder().encodeToString(secret.getEncoded());
         } catch (NoSuchAlgorithmException e) {
@@ -34,11 +35,6 @@ public class CryptUtils {
         return new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
     }
 
-    private static IvParameterSpec generateIv() {
-        byte[] iv = new byte[16];
-        new SecureRandom().nextBytes(iv);
-        return new IvParameterSpec(iv);
-    }
 
     public static String getKeyFromPassword(String password, String salt) throws InvalidKeySpecException {
         SecretKeyFactory factory = null;

@@ -1,6 +1,4 @@
 import { IconButton, createIcon, useLightboxProps, useLightboxState } from "yet-another-react-lightbox";
-import { downloadBlob } from "../../../../utils/download";
-import { useAstrotheque } from "../../../../hooks/useAstrotheque";
 import { useState } from "react";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import { Picture } from "../../../../types/Picture";
@@ -12,7 +10,6 @@ const NoteIcon = createIcon(
 
 export function NoteButton() {
   const { render } = useLightboxProps();
-  const { setNotification } = useAstrotheque();
   const { currentSlide } = useLightboxState();
   const [open, setOpen] = useState(false);
 

@@ -1,7 +1,6 @@
 import { Image, ImageSearch, RawOn } from "@mui/icons-material";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { IconButton, createIcon, useLightboxProps, useLightboxState } from "yet-another-react-lightbox";
 import { downloadBlob } from "../../../../utils/download";
 import { useAstrotheque } from "../../../../hooks/useAstrotheque";

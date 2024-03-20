@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Card, CardContent, CardMedia, Checkbox, CircularProgress, FormControl, FormControlLabel, FormGroup, FormLabel, NativeSelect, Paper, Radio, RadioGroup, TextField, Typography } from "@mui/material"
+import { Alert, Box, Button, Card, CardContent, CardMedia, CircularProgress, FormControl, FormControlLabel , NativeSelect, Paper, Radio, RadioGroup, TextField, Typography } from "@mui/material"
 import obs from '../assets/obs.jpeg'
 import { SubmitHandler, useForm } from "react-hook-form"
 import { useLocalStorage } from "usehooks-ts"
@@ -41,7 +41,7 @@ export const Importation = () => {
     const fitFiles = useRef(null);
     const [issue, setIssue] = useState<Issue | null>(null);
     const previewFiles = useRef(null);
-    const myFetch = useFetch(15 * 60000);
+    const myFetch = useFetch(120000); // 2min
     const [instrument, saveInstrument] = useLocalStorage("instrument", '');
     const [location, saveLocation] = useLocalStorage("location", 'maison');
     useEffect(() => setValue('instrument', instrument), [instrument]);
