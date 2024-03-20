@@ -3,6 +3,7 @@ package com.github.ffremont.astrotheque.web.model;
 
 import com.github.ffremont.astrotheque.core.Validator;
 import com.github.ffremont.astrotheque.service.model.FitData;
+import com.github.ffremont.astrotheque.service.model.PlanetSatellite;
 import com.github.ffremont.astrotheque.service.model.Weather;
 import lombok.Builder;
 
@@ -19,7 +20,8 @@ public record Observation(
         String location,
         Weather weather,
         String instrument,
-        String corrred,
+
+        PlanetSatellite planetSatellite,
         List<FitData> fits,
         List<PreviewData> previews) {
 

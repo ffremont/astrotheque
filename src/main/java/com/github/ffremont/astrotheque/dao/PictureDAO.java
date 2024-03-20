@@ -110,8 +110,8 @@ public class PictureDAO {
                     .weather(obs.weather())
                     .filename(fit.getFilename())
                     .imported(LocalDateTime.now())
+                    .planetSatellite(obs.planetSatellite())
                     .instrument(obs.instrument())
-                    .corrRed(obs.corrred())
                     .observationId(obs.id())
                     .state(PictureState.PENDING).build()));
         }
@@ -151,8 +151,10 @@ public class PictureDAO {
 
             Files.copy(jpg, pictureDir.resolve(PICTURE_FILENAME));
             Files.copy(raw, pictureDir.resolve(RAW_FILENAME));
-            Files.copy(annotated, pictureDir.resolve(ANNOTATED_FILENAME));
-
+            if (Objects.nonNull(annotated)) {
+                Files.copy(annotated, pictureDir.resolve(ANNOTATED_FILENAME));
+            }
+            
             Files.write(pictureDir.resolve(DATA_FILENAME), JSON.writer().writeValueAsBytes(picture), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
 
             DATASTORE.put(picture.getId(), new Belong<>(owner, picture));

@@ -16,8 +16,9 @@ import { CriteriaNames, allCriteria } from "../types/Criteria";
 import PhotoAlbum from "react-photo-album";
 import { Item } from "../types/Item";
 import { Raw } from "../libs/yet-another-react-lightbox/plugins/raw/Raw";
-import { Annotated } from "../libs/yet-another-react-lightbox/plugins/annotated/Annotated";
+import { Annotated, Note } from "../libs/yet-another-react-lightbox/plugins/note/Note";
 import { useAstrotheque } from "../hooks/useAstrotheque";
+import { Binaries } from "../libs/yet-another-react-lightbox/plugins/binaries/Binaries";
 
 const donePictures = (pictures: Picture[]) => pictures.filter(p => p.state === 'DONE');
 
@@ -124,7 +125,7 @@ export const Home = () => {
                     open={index >= 0}
                     index={index}
                     close={() => setIndex(-1)}
-                    plugins={[Captions, Share, Counter, Remove, Edit, Download, Raw, Annotated]}
+                    plugins={[Captions, Share, Counter, Remove, Edit, Binaries, Note]}
                 />
 
                 <Link to="/importation"><Fab className="fab-add-obs" size="medium" color="secondary" variant="extended">

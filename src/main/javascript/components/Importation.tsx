@@ -11,9 +11,9 @@ import { MAX_UPLOAD_SIZE } from "../constant";
 type Inputs = {
     weather: string,
     instrument: string,
-    corrred: string,
     location: string
     nature: string
+    planetSatellite: string
 }
 
 type Issue = {
@@ -30,8 +30,9 @@ export const Importation = () => {
         formState: { errors },
     } = useForm<Inputs>({
         shouldUseNativeValidation: true,
-        defaultValues:{
-            nature: 'DSO'
+        defaultValues: {
+            nature: 'DSO',
+            planetSatellite: 'MOON'
         }
 
     })
@@ -43,12 +44,11 @@ export const Importation = () => {
     const myFetch = useFetch(15 * 60000);
     const [instrument, saveInstrument] = useLocalStorage("instrument", '');
     const [location, saveLocation] = useLocalStorage("location", 'maison');
-    const [corrred, saveCorrred] = useLocalStorage("corrred", '');
     useEffect(() => setValue('instrument', instrument), [instrument]);
-    useEffect(() => setValue('corrred', corrred), [corrred]);
     useEffect(() => setValue('location', location), [location]);
 
     const multiple = watch('nature') === 'DSO';
+    const previewNecessary = watch('nature') === 'PLANET_SATELLITE';
 
     const onSubmit: SubmitHandler<Inputs> = (data) => {
         const form = new FormData();
@@ -58,10 +58,10 @@ export const Importation = () => {
         form.append('data', JSON.stringify({
             location: data.location,
             weather: data.weather,
-            instrument: data.instrument,
-            corrred: data.corrred
+            instrument: data.instrument
         }));
         form.append('nature', data.nature);
+        form.append('planetSatellite', data.planetSatellite);
         if (fitFiles.current) {
             const files: any = (fitFiles.current as HTMLElement).querySelector('input')?.files;
             for (let index = 0; index < files.length; index++) {
@@ -105,7 +105,6 @@ export const Importation = () => {
         }
         setLoading(true);
         saveInstrument(data.instrument);
-        saveCorrred(data.corrred);
         saveLocation(data.location);
         myFetch.post('/api/observation', form)
             .then(() => {
@@ -143,15 +142,31 @@ export const Importation = () => {
                     name="nature"
                 >
                     <FormControlLabel value="DSO" control={<Radio checked={watch('nature') === 'DSO'} {...register('nature')} />} label="Ciel profond" />
-                    <FormControlLabel value="PLANET" control={<Radio checked={watch('nature') === 'PLANET'} {...register('nature')} />} label="Planète" />
-                    
+                    <FormControlLabel value="PLANET_SATELLITE" control={<Radio checked={watch('nature') === 'PLANET_SATELLITE'} {...register('nature')} />} label="Planète / Satellite" />
+
                 </RadioGroup>
+                {(watch('nature') === 'PLANET_SATELLITE') && (
+                    <NativeSelect
+                        className="form-control"
+                        required {...register("planetSatellite", { required: true })} error={!!errors.planetSatellite}
+                        fullWidth
+                    >
+                        <option value={'MOON'}>Lune</option>
+                        <option value={'SUN'}>Soleil</option>
+                        <option value={'MARS'}>Mars</option>
+                        <option value={'MERCURY'}>Mercure</option>
+                        <option value={'VENUS'}>Venus</option>
+                        <option value={'JUPITER'}>Jupiter</option>
+                        <option value={'SATURN'}>Saturne</option>
+                        <option value={'NEPTUNE'}>Neptune</option>
+                        <option value={'OTHER'}>Autre</option>
+                    </NativeSelect>)}
             </FormControl>
         </Paper>
 
         <Paper className="form-section">
             <Typography align="left" sx={{ fontWeight: "bold" }} gutterBottom>
-                Fichier{multiple ? 's': ''} FIT
+                Fichier{multiple ? 's' : ''} FIT
             </Typography>
 
             <TextField type="file"
@@ -167,7 +182,7 @@ export const Importation = () => {
 
         <Paper className="form-section">
             <Typography align="left" sx={{ fontWeight: "bold" }} gutterBottom>
-                Fichier{multiple ? 's': ''} aperçu (facultatif)
+                Fichier{multiple ? 's' : ''} aperçu {previewNecessary ? '': '(facultatif)'}
             </Typography>
             <Typography align="justify" variant="body2" gutterBottom>
                 Les fichiers doivent avoir le même nom que les fichiers FITs afin de les associer ensemble.
@@ -176,6 +191,7 @@ export const Importation = () => {
             <TextField type="file"
                 ref={previewFiles}
                 name="preview"
+                required={previewNecessary}
                 inputProps={{
                     multiple,
                     accept: "image/jpeg,image/jpg"
@@ -213,7 +229,7 @@ export const Importation = () => {
             </Typography>
 
             <TextField className="form-control" fullWidth required {...register("instrument", { required: true, maxLength: 256, minLength: 2 })} error={!!errors.instrument} label="Instrument" variant="standard" />
-            <TextField className="form-control" fullWidth {...register("corrred", { maxLength: 256, minLength: 2 })} error={!!errors.corrred} label="Correcteur / reducteur" variant="standard" />
+            
         </Paper>
 
         {issue && <Alert sx={{ textAlign: 'left', marginBottom: '1rem' }} severity="error">

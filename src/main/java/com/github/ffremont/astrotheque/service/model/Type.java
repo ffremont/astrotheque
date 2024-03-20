@@ -29,6 +29,7 @@ public enum Type {
     EMISSION_NEBULA(Collections.EMPTY_LIST),
     REFLECTION_NEBULA(Collections.EMPTY_LIST),
     SUPERNOVA_REMNANT(Collections.EMPTY_LIST),
+    SATELLITE(Collections.EMPTY_LIST),
     PLANET(Collections.EMPTY_LIST);
     private final List<String> code;
 

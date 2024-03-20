@@ -3,7 +3,6 @@ package com.github.ffremont.astrotheque.service
 
 import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.dao.AstrometryDAO;
-import com.github.ffremont.astrotheque.dao.PictureDAO;
 import com.github.ffremont.astrotheque.service.model.CelestObject;
 import com.github.ffremont.astrotheque.service.model.FitData;
 import com.github.ffremont.astrotheque.service.model.PictureState;
@@ -33,7 +32,6 @@ public class FitImporter implements Runnable {
 
 
     private final AstrometryDAO astrometryDAO;
-    private final PictureDAO pictureDAO;
 
     private final MoonService moonService;
     private final DeepSkyCatalogService deepSkyCatalogService;
@@ -42,10 +40,11 @@ public class FitImporter implements Runnable {
 
     private final String astrometryNovaApikey;
     private final String owner;
+    private final PictureService pictureService;
 
-    public FitImporter(AstrometryDAO astrometryDAO, PictureDAO pictureDAO, MoonService moonService, DeepSkyCatalogService deepSkyCatalogService, Observation observation, String astrometryNovaApikey, String owner) {
+    public FitImporter(AstrometryDAO astrometryDAO, PictureService pictureService, MoonService moonService, DeepSkyCatalogService deepSkyCatalogService, Observation observation, String astrometryNovaApikey, String owner) {
         this.astrometryDAO = astrometryDAO;
-        this.pictureDAO = pictureDAO;
+        this.pictureService = pictureService;
         this.moonService = moonService;
         this.deepSkyCatalogService = deepSkyCatalogService;
         this.observation = observation;
@@ -56,7 +55,7 @@ public class FitImporter implements Runnable {
     public FitImporter(IoC ioC, Observation observation, String astrometryNovaApikey, String owner) {
         this(
                 ioC.get(AstrometryDAO.class),
-                ioC.get(PictureDAO.class),
+                ioC.get(PictureService.class),
                 ioC.get(MoonService.class),
                 ioC.get(DeepSkyCatalogService.class),
                 observation, astrometryNovaApikey, owner
@@ -149,7 +148,7 @@ public class FitImporter implements Runnable {
 
                     var tags = info.tags().stream().map(tag -> tag.replace(" ", "")).toList();
                     var celest = deepSkyCatalogService.findCelestObject(tags);
-                    var picture = pictureDAO.getById(owner, pictureId).toBuilder()
+                    var picture = pictureService.get(owner, pictureId).toBuilder()
                             .ra(info.calibration().ra())
                             .name(celest.map(CelestObject::name).orElse(null))
                             .dec(info.calibration().dec())
@@ -161,7 +160,6 @@ public class FitImporter implements Runnable {
                             .state(PictureState.DONE)
                             .moonPhase(moonService.phaseOf(fit.getDateObs().toLocalDate()))
                             .dateObs(fit.getDateObs())
-                            .corrRed(observation.corrred())
                             .constellation(deepSkyCatalogService.constellationOf(tags).orElse(null))
                             .exposure(fit.getExposure())
                             .weather(observation.weather())
@@ -175,10 +173,10 @@ public class FitImporter implements Runnable {
                     log.info("{} / ✅ annotated image got", owner);
 
                     log.info("{} / now, saving picture {}...", owner, fit.getFilename());
-                    pictureDAO.save(
+                    pictureService.save(
                             owner,
                             picture,
-                            preview.isPresent() ? Files.newInputStream(preview.get().tempFile()) : null,
+                            Files.newInputStream(preview.get().tempFile()),
                             new ByteArrayInputStream(thumbnail.toByteArray()),
                             Files.newInputStream(fit.getTempFile()),
                             annotated
@@ -189,7 +187,7 @@ public class FitImporter implements Runnable {
             } catch (Exception e) {
                 log.error("{}/ Analyze de l'image impossible : {}", owner, fit.getTempFile().toString(), e);
                 try {
-                    pictureDAO.cancel(owner, fit.getId());
+                    pictureService.cancel(owner, fit.getId());
                     if (fit.getTempFile().toFile().delete()) {
                         log.info("{}/ Effacement du fichier temporaire", owner);
                     } else {

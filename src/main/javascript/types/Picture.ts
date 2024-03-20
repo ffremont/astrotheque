@@ -1,4 +1,5 @@
 import { MoonPhase } from './MoonPhase'
+import { PlanetSatellite } from './PlanetSatellite'
 
 export type Picture = {
     id: string
@@ -6,6 +7,7 @@ export type Picture = {
     state: 'PENDING' | 'DONE' | 'FAILED'
     imported: number
     name: string
+    planetSatellite?:PlanetSatellite
     filename: string
     moonPhase: MoonPhase
     dateObs: string
@@ -13,7 +15,6 @@ export type Picture = {
     instrument: string
     location: string
     camera: string
-    corrRed: string
     exposure: number
     gain: number
     note:string

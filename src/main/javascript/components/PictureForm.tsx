@@ -198,16 +198,7 @@ export const PictureForm = () => {
                     defaultValue={picture.camera}
                     variant="standard"
                 />
-                <TextField
-                    margin="dense"
-                    label="Corrector / reductor"
-                    type="text"
-                    className="field"
-                    fullWidth
-                    name="corrRed"
-                    defaultValue={picture.corrRed}
-                    variant="standard"
-                />
+               
 
             </Paper>
 

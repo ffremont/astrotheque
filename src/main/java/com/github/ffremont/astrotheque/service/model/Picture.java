@@ -16,6 +16,7 @@ public class Picture implements Comparable<Picture> {
     String id;
     String observationId;
     PictureState state;
+    PlanetSatellite planetSatellite;
     LocalDateTime imported;
     String filename;
     String name;
@@ -26,7 +27,6 @@ public class Picture implements Comparable<Picture> {
     String instrument;
     String location;
     String camera;
-    String corrRed;
     Float exposure;
     Integer gain;
 

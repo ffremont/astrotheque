@@ -23,7 +23,6 @@ export const fromList = (pictures: Picture[]): PictureInAlbum[] => {
         }s x ${picture.stackCnt}) avec ${picture.camera} sur ${
             picture.instrument
         } / ${[
-            picture.corrRed,
             MoonPhases[picture.moonPhase],
             `Météo : ${Weathers[picture.weather]}`,
             picture.tags.join(', ')

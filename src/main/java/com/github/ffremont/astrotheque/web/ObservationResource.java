@@ -10,6 +10,7 @@ import com.github.ffremont.astrotheque.core.httpserver.multipart.Part;
 import com.github.ffremont.astrotheque.service.ObservationService;
 import com.github.ffremont.astrotheque.service.model.FitData;
 import com.github.ffremont.astrotheque.service.model.Nature;
+import com.github.ffremont.astrotheque.service.model.PlanetSatellite;
 import com.github.ffremont.astrotheque.web.model.Observation;
 import com.github.ffremont.astrotheque.web.model.PreviewData;
 import com.sun.net.httpserver.HttpExchange;
@@ -74,9 +75,20 @@ public class ObservationResource implements HttpHandler {
 
             if (Nature.DSO.equals(nature)) {
                 log.info("DSO > Importation basé sur nova astrometry");
-                observationService.importObservation(exchange.getPrincipal().getUsername(), newObs);
-            } else if (Nature.PLANET.equals(nature)) {
-                
+                observationService.newDsoObservation(exchange.getPrincipal().getUsername(), newObs);
+            } else if (Nature.PLANET_SATELLITE.equals(nature)) {
+                PlanetSatellite planetSatellite = parts.stream().filter(part ->
+                                "planetSatellite".equals(part.name())
+                                        && Objects.nonNull(part.value())
+                        )
+                        .map(Part::value)
+                        .map(PlanetSatellite::valueOf)
+                        .findFirst().orElseThrow();
+                observationService.newPlanetSatelliteObservation(exchange.getPrincipal().getUsername(),
+                        newObs.toBuilder()
+                                .planetSatellite(planetSatellite)
+                                .build()
+                );
             } else {
                 throw new RuntimeException("Pas implémenté");
             }

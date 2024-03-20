@@ -15,5 +15,6 @@ export const PictureTypes: any = {
     SUPERNOVA_REMNANT: 'Supernova rémanente',
     NOVA_STAR: 'Etoile Nova',
     COMETE: 'Comète',
+    SATELLITE: 'Satellite',
     PLANET: 'Planète',
 }

@@ -1,0 +1,1 @@
+export type PlanetSatellite = 'MOON' | 'SATURN' | 'SUN' | 'JUPITER' | 'VENUS' | 'MARS' | 'MERCURY' | 'NEPTUNE' | 'OTHER' ;
