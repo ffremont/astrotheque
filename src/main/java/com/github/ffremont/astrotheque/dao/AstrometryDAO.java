@@ -87,7 +87,7 @@ public class AstrometryDAO {
                                 "publicly_visible": "n",
                                 "allow_modifications": "d",
                                 "session": "$SESSION",
-                                "allow_commercial_use": "d"                          
+                                "allow_commercial_use": "n"                          
                             }
                             """.replace("$SESSION", sessionId))
                     .filePart("file", file)
@@ -124,7 +124,28 @@ public class AstrometryDAO {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(this.baseurl + "/annotated_display/" + jobId))
-                    .timeout(Duration.ofSeconds(15))
+                    .timeout(Duration.ofMinutes(2))
+                    .GET()
+                    .build();
+            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+            return response.body();
+        } catch (URISyntaxException | IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * retourne le format fit normalisé par astrometry nova
+     *
+     * @param jobId
+     * @return
+     */
+    public InputStream getFit(Integer jobId) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI(this.baseurl + "/new_fits_file/" + jobId))
+                    .timeout(Duration.ofMinutes(3))
                     .GET()
                     .build();
             HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
@@ -145,7 +166,7 @@ public class AstrometryDAO {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(this.baseurl + "/image/" + imageId))
-                    .timeout(Duration.ofSeconds(15))
+                    .timeout(Duration.ofMinutes(2))
                     .GET()
                     .build();
             HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());

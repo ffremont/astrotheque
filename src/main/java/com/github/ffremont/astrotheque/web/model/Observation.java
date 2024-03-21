@@ -2,6 +2,7 @@ package com.github.ffremont.astrotheque.web.model;
 
 
 import com.github.ffremont.astrotheque.core.Validator;
+import com.github.ffremont.astrotheque.service.model.File;
 import com.github.ffremont.astrotheque.service.model.FitData;
 import com.github.ffremont.astrotheque.service.model.PlanetSatellite;
 import com.github.ffremont.astrotheque.service.model.Weather;
@@ -22,8 +23,12 @@ public record Observation(
         String instrument,
 
         PlanetSatellite planetSatellite,
+
+        List<File> files,
+        @Deprecated
         List<FitData> fits,
-        List<PreviewData> previews) {
+        @Deprecated
+        List<File> previews) {
 
     public Observation {
         check(

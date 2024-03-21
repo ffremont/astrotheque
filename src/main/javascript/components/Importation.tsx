@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Card, CardContent, CardMedia, CircularProgress, FormControl, FormControlLabel , NativeSelect, Paper, Radio, RadioGroup, TextField, Typography } from "@mui/material"
+import { Alert, Box, Button, Card, CardContent, CardMedia, Checkbox, CircularProgress, FormControl, FormControlLabel, FormGroup, NativeSelect, Paper, Radio, RadioGroup, TextField, Typography } from "@mui/material"
 import obs from '../assets/obs.jpeg'
 import { SubmitHandler, useForm } from "react-hook-form"
 import { useLocalStorage } from "usehooks-ts"
@@ -13,6 +13,7 @@ type Inputs = {
     instrument: string,
     location: string
     nature: string
+    analyze: string
     planetSatellite: string
 }
 
@@ -32,28 +33,24 @@ export const Importation = () => {
         shouldUseNativeValidation: true,
         defaultValues: {
             nature: 'DSO',
-            planetSatellite: 'MOON'
+            planetSatellite: 'MOON',
+            analyze: true
         }
 
     })
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const fitFiles = useRef(null);
+    const files = useRef(null);
     const [issue, setIssue] = useState<Issue | null>(null);
-    const previewFiles = useRef(null);
     const myFetch = useFetch(120000); // 2min
     const [instrument, saveInstrument] = useLocalStorage("instrument", '');
     const [location, saveLocation] = useLocalStorage("location", 'maison');
     useEffect(() => setValue('instrument', instrument), [instrument]);
     useEffect(() => setValue('location', location), [location]);
 
-    const multiple = watch('nature') === 'DSO';
-    const previewNecessary = watch('nature') === 'PLANET_SATELLITE';
-
     const onSubmit: SubmitHandler<Inputs> = (data) => {
         const form = new FormData();
         const fitNames = [];
-        const jpgNames = [];
         let totalSize = 0;
         form.append('data', JSON.stringify({
             location: data.location,
@@ -61,24 +58,16 @@ export const Importation = () => {
             instrument: data.instrument
         }));
         form.append('nature', data.nature);
+        form.append('analyze', data.analyze ? 'true': 'false');
         form.append('planetSatellite', data.planetSatellite);
-        if (fitFiles.current) {
-            const files: any = (fitFiles.current as HTMLElement).querySelector('input')?.files;
-            for (let index = 0; index < files.length; index++) {
-                form.append('fits', files[index]);
-                fitNames.push(files[index].name);
-                totalSize += parseInt(files[index].size);
+        if (files.current) {
+            const allfiles: any = (files.current as HTMLElement).querySelector('input')?.files;
+            for (let index = 0; index < allfiles.length; index++) {
+                form.append('files', allfiles[index]);
+                fitNames.push(allfiles[index].name);
+                totalSize += parseInt(allfiles[index].size);
             }
         }
-        if (previewFiles.current) {
-            const files: any = (previewFiles.current as HTMLElement).querySelector('input')?.files;
-            for (let index = 0; index < files.length; index++) {
-                form.append('previews', files[index]);
-                jpgNames.push(files[index].name);
-                totalSize += parseInt(files[index].size);
-            }
-        }
-
 
         if (totalSize > MAX_UPLOAD_SIZE) {
             setIssue({
@@ -88,21 +77,6 @@ export const Importation = () => {
             return;
         }
 
-        if (!fitNames.every(filename => filename.endsWith(".fit"))) {
-            setIssue({
-                title: "Fichiers FIT",
-                message: `Certains fichiers FIT n'ont pas l'extension .fit.`
-            })
-            return;
-        }
-
-        if (!jpgNames.every(filename => filename.endsWith(".jpg") || filename.endsWith(".jpeg"))) {
-            setIssue({
-                title: "Fichiers JPG",
-                message: `Certains fichiers aperçus n'ont pas l'extension .jpg / .jpeg.`
-            })
-            return;
-        }
         setLoading(true);
         saveInstrument(data.instrument);
         saveLocation(data.location);
@@ -166,39 +140,24 @@ export const Importation = () => {
 
         <Paper className="form-section">
             <Typography align="left" sx={{ fontWeight: "bold" }} gutterBottom>
-                Fichier{multiple ? 's' : ''} FIT
+                Fichiers (Jpeg, png, fit)
             </Typography>
 
             <TextField type="file"
                 required
-                ref={fitFiles}
-                name="fits"
+                ref={files}
+                name="files"
                 inputProps={{
-                    multiple,
-                    accept: "image/fits"
+                    multiple: true,
+                    accept: ".fit, .fits, .png, .jpg, .jpeg,image/fits, application/fits, image/png, image/jpeg"
                 }}
-                fullWidth label="Fichiers FITs" variant="standard" />
+                fullWidth label="Images" variant="standard" />
+
+            <FormGroup>
+                <FormControlLabel control={<Checkbox checked={!!watch('analyze')} {...register('analyze')}  defaultChecked />} label="Analyse nova.astrometry.net" />
+            </FormGroup>
         </Paper>
 
-        <Paper className="form-section">
-            <Typography align="left" sx={{ fontWeight: "bold" }} gutterBottom>
-                Fichier{multiple ? 's' : ''} aperçu {previewNecessary ? '': '(facultatif)'}
-            </Typography>
-            <Typography align="justify" variant="body2" gutterBottom>
-                Les fichiers doivent avoir le même nom que les fichiers FITs afin de les associer ensemble.
-            </Typography>
-
-            <TextField type="file"
-                ref={previewFiles}
-                name="preview"
-                required={previewNecessary}
-                inputProps={{
-                    multiple,
-                    accept: "image/jpeg,image/jpg"
-                }}
-                fullWidth label="Fichiers apercu" variant="standard" />
-
-        </Paper>
 
         <Paper className="form-section">
             <Typography align="left" sx={{ fontWeight: "bold" }} gutterBottom>
@@ -229,7 +188,7 @@ export const Importation = () => {
             </Typography>
 
             <TextField className="form-control" fullWidth required {...register("instrument", { required: true, maxLength: 256, minLength: 2 })} error={!!errors.instrument} label="Instrument" variant="standard" />
-            
+
         </Paper>
 
         {issue && <Alert sx={{ textAlign: 'left', marginBottom: '1rem' }} severity="error">

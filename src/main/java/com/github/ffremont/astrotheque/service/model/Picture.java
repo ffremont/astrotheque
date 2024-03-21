@@ -38,6 +38,14 @@ public class Picture implements Comparable<Picture> {
     Float ra;
     Float dec;
     Type type;
+    /**
+     * deg
+     */
+    Float radius;
+    /**
+     * arcsec/pixel
+     */
+    Float pixscale;
     String note;
 
     List<String> webTags;

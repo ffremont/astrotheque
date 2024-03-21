@@ -8,11 +8,8 @@ import nom.tam.fits.FitsException;
 import nom.tam.fits.HeaderCard;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -28,22 +25,15 @@ public class FitUtils {
             // from fit header or creation file date
             var dateObs = Optional.ofNullable(hdu.getHeader().findCard("DATE-OBS").getValue())
                     .filter(Predicate.not(String::isEmpty))
-                    .map(LocalDateTime::parse)
-                    .orElseGet(() -> {
-                        try {
-                            BasicFileAttributes attr = Files.readAttributes(fitFile, BasicFileAttributes.class);
-                            return LocalDateTime.ofInstant(attr.creationTime().toInstant(), ZoneId.systemDefault());
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                    .map(LocalDateTime::parse);
+
             return FitData.builder()
                     .tempFile(fitFile)
-                    .gain(Integer.valueOf(Optional.ofNullable(hdu.getHeader().findCard("GAIN")).map(HeaderCard::getValue).orElse("120")))
+                    .gain(Optional.ofNullable(hdu.getHeader().findCard("GAIN")).map(HeaderCard::getValue).map(Integer::valueOf).orElse(null))
                     .stackCnt(Integer.valueOf(
                             Optional.ofNullable(hdu.getHeader().findCard("STACKCNT")).map(HeaderCard::getValue).orElse("1"))
                     )
-                    .dateObs(dateObs)
+                    .dateObs(dateObs.orElse(null))
                     .instrume(Optional.ofNullable(hdu.getHeader().findCard("INSTRUME")).map(HeaderCard::getValue).orElse(""))
                     .exposure(
                             Optional.ofNullable(hdu.getHeader().findCard("EXPOSURE"))
@@ -51,8 +41,8 @@ public class FitUtils {
                                     .map(Float::parseFloat)
                                     .orElse(1F)
                     )
-                    .temp(Float.parseFloat(
-                            Optional.ofNullable(hdu.getHeader().findCard("CCD-TEMP")).map(HeaderCard::getValue).orElse("20"))
+                    .temp(
+                            Optional.ofNullable(hdu.getHeader().findCard("CCD-TEMP")).map(HeaderCard::getValue).map(Float::parseFloat).orElse(null)
                     )
                     .build();
         } catch (FitsException | IOException e) {

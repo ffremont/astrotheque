@@ -1,6 +1,7 @@
 package com.github.ffremont.astrotheque.service;
 
 import com.github.ffremont.astrotheque.core.IoC;
+import com.github.ffremont.astrotheque.service.model.File;
 import com.github.ffremont.astrotheque.service.model.FitData;
 import com.github.ffremont.astrotheque.service.model.Picture;
 import com.github.ffremont.astrotheque.service.model.PictureState;
@@ -16,9 +17,13 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static com.github.ffremont.astrotheque.service.utils.FileUtils.isFit;
+import static com.github.ffremont.astrotheque.service.utils.FileUtils.isImage;
 
 @Slf4j
 public class ObservationService {
@@ -62,49 +67,49 @@ public class ObservationService {
     public void newPlanetSatelliteObservation(String accountName, Observation observation) {
         log.info("{} / 🔭 Nouvelle observation planète ou satellite", accountName);
 
-        var fit = observation.fits().stream().findFirst().orElseThrow();
-        var preview = observation.previews().stream().findFirst().orElseThrow();
+        for (File file : observation.files()) {
+            // il faut une image et un fit
+            var image = Optional.of(file)
+                    .filter(f -> isImage.test(f.filename()))
+                    .or(() -> Optional.ofNullable(file.relatedTo())).orElseThrow();
+            var fit = Optional.of(file)
+                    .filter(f -> isFit.test(f.filename()))
+                    .or(() -> Optional.ofNullable(file.relatedTo())).orElseThrow();
 
-        var thumbnail = new ByteArrayOutputStream();
-        try {
-            Thumbnails.of(preview.tempFile().toFile())
-                    .size(512, 512)
-                    .outputFormat("jpg")
-                    .toOutputStream(thumbnail);
-            Picture picture = Picture.builder()
-                    .id(UUID.randomUUID().toString())
-                    .planetSatellite(observation.planetSatellite())
-                    .name(observation.planetSatellite().getLabel())
-                    .state(PictureState.DONE)
-                    .filename(fit.getFilename())
-                    .imported(LocalDateTime.now())
-                    .camera(fit.getInstrume())
-                    .gain(fit.getGain())
-                    .instrument(observation.instrument())
-                    .tags(List.of(observation.planetSatellite().name()))
-                    .hash(fit.getHash())
-                    .state(PictureState.DONE)
-                    .moonPhase(moonService.phaseOf(fit.getDateObs().toLocalDate()))
-                    .dateObs(fit.getDateObs())
-                    .exposure(fit.getExposure())
-                    .weather(observation.weather())
-                    .location(observation.location())
-                    .type(observation.planetSatellite().getType())
-                    .stackCnt(fit.getStackCnt())
-                    .build();
+            var thumbnail = new ByteArrayOutputStream();
+            try {
+                Thumbnails.of(image.tempFile().toFile())
+                        .size(512, 512)
+                        .outputFormat("jpg")
+                        .toOutputStream(thumbnail);
+                Picture picture = Picture.builder()
+                        .id(UUID.randomUUID().toString())
+                        .planetSatellite(observation.planetSatellite())
+                        .name(observation.planetSatellite().getLabel())
+                        .state(PictureState.DONE)
+                        .filename(file.filename())
+                        .imported(LocalDateTime.now())
+                        .instrument(observation.instrument())
+                        .tags(List.of(observation.planetSatellite().name()))
+                        .state(PictureState.DONE)
+                        .weather(observation.weather())
+                        .location(observation.location())
+                        .type(observation.planetSatellite().getType())
+                        .stackCnt(1)
+                        .build();
 
-            pictureService.save(accountName, picture, Files.newInputStream(preview.tempFile()),
-                    new ByteArrayInputStream(thumbnail.toByteArray()),
-                    Files.newInputStream(fit.getTempFile()),
-                    null
-            );
+                pictureService.save(accountName, picture, Files.newInputStream(image.tempFile()),
+                        new ByteArrayInputStream(thumbnail.toByteArray()),
+                        Files.newInputStream(fit.tempFile()),
+                        null
+                );
 
-            log.info("{} / 🔭✅ importation planète ou satellite", accountName);
-        } catch (IOException e) {
-            log.error("{} / 🔭❌ importation planète ou satellite", accountName, e);
-            throw new RuntimeException(accountName + " / thumb génération impossible", e);
+                log.info("{} / 🔭✅ importation planète ou satellite", accountName);
+            } catch (IOException e) {
+                log.error("{} / 🔭❌ importation planète ou satellite", accountName, e);
+                throw new RuntimeException(accountName + " / thumb génération impossible", e);
+            }
         }
-
     }
 
 

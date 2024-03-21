@@ -7,7 +7,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.service.DynamicProperties;
 import com.github.ffremont.astrotheque.service.model.Belong;
-import com.github.ffremont.astrotheque.service.model.FitData;
 import com.github.ffremont.astrotheque.service.model.Picture;
 import com.github.ffremont.astrotheque.service.model.PictureState;
 import com.github.ffremont.astrotheque.web.model.Observation;
@@ -100,15 +99,12 @@ public class PictureDAO {
                         hashOfRaw.equals(stringPictureEntry.getValue().getData().getHash()));
     }
 
-    /**
-     * @param ids
-     * @param obs
-     */
+    
     public void allocate(String owner, Observation obs) {
-        for (FitData fit : obs.fits()) {
-            DATASTORE.put(fit.getId(), new Belong<>(owner, Picture.builder().id(fit.getId())
+        for (com.github.ffremont.astrotheque.service.model.File file : obs.files()) {
+            DATASTORE.put(file.id(), new Belong<>(owner, Picture.builder().id(file.id())
                     .weather(obs.weather())
-                    .filename(fit.getFilename())
+                    .filename(file.filename())
                     .imported(LocalDateTime.now())
                     .planetSatellite(obs.planetSatellite())
                     .instrument(obs.instrument())
@@ -154,7 +150,7 @@ public class PictureDAO {
             if (Objects.nonNull(annotated)) {
                 Files.copy(annotated, pictureDir.resolve(ANNOTATED_FILENAME));
             }
-            
+
             Files.write(pictureDir.resolve(DATA_FILENAME), JSON.writer().writeValueAsBytes(picture), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
 
             DATASTORE.put(picture.getId(), new Belong<>(owner, picture));

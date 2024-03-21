@@ -1,8 +1,8 @@
-import { AppBar, Badge, Box, Divider, IconButton, ListItemIcon, Menu, MenuItem, Toolbar, Typography } from "@mui/material";
+import { AppBar, Badge, Box, Divider, IconButton, Link, ListItemIcon, Menu, MenuItem, Toolbar, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import UploadIcon from '@mui/icons-material/Upload';
-import { AccountCircle, Logout, Settings } from "@mui/icons-material";
+import { AccountCircle, Logout, Settings, Support } from "@mui/icons-material";
 import { useAstrotheque } from "../../hooks/useAstrotheque";
 import { useFetch } from "../../hooks/useFetch";
 import { useNavigate } from "react-router-dom";
@@ -144,6 +144,15 @@ export const Header = ({ onClickImport, onClickConfig, onClickProfil }: HeaderPr
                         </ListItemIcon>
                         Profil
                     </MenuItem>
+
+                    <Divider />
+                    <MenuItem component={Link} href="https://forms.gle/fPkXPNAeiuBKMxzf6">
+                        <ListItemIcon>
+                            <Support fontSize="small" />
+                        </ListItemIcon>
+                        Support
+                    </MenuItem>
+
                     <MenuItem onClick={handleLogout}>
                         <ListItemIcon>
                             <Logout fontSize="small" />

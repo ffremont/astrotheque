@@ -18,14 +18,16 @@
 
 ## Fonctionnalités
 
+* **Planétaire / Ciel profond**: déposer vos cliqués DSO ou planétaire
 * **Fichiers**: importation des fichiers au format FIT pour une session d'observation
-* **Analyse**: analyse automatique à l'aide de la solution nova astrometry
+* **Analyse DSO**: analyse automatique à l'aide de la solution nova astrometry
 * **Mise à jour** : édition avancer (constellation, exposition, stacking count,...)
 * **Dépôt**: téléversement des fichiers FIT mais aussi des image JPG associées
-* **Hébergement**: instaler sur votre poste ou sur un serveur l'application
+* **Hébergement**: installer sur votre poste ou sur un serveur l'application
 * **Suivi**: suivi des analyses dans le temps via le menu latéral
 * **Lune**: calcule automatique de la lunaison sur la base de la date
 * **Recherche**: exploiter la barre recherche pour filtrer par lunaison, type, constellation...
+* **😎 C'est vous le propriétaire de vos données !**
 
 ## 👋 Utilisation
 
@@ -40,7 +42,7 @@ L'application est pourvue d'un lançeur pour **mac** et **windows**, permettant 
 facilitée.
 L'ensemble des données seront stockées dans **votre répertoire utilisateur, dans "astrotheque"**.
 
-🌎 👉**Adresse d'accès** : http://localhost:99999
+🌎 👉**Adresse d'accès** : http://localhost:9999
 
 Pour plus de fiabilité, vous pouvez synchroniser ce répertoire avec le cloud de votre choix.
 
@@ -63,7 +65,7 @@ Pour configurer l'application, vous pouvez utiliser des variables d'environnemen
 - `DATA_DIR`: Répertoire de données pour stocker les photographies astronomiques. Par défaut, `~/astrotheque`.
 - `WEB_THREAD_POOL`: Taille du pool de thread web. Par défaut `10`.
 - `ASTROMETRY_NOVA_BASEURL`: URL de base pour Astrometry Nova. Par défaut, `https://nova.astrometry.net`.
-- `PORT`: Port sur lequel l'application écoutera. Par défaut, `8080`.
+- `PORT`: Port sur lequel l'application écoutera. Par défaut, `9999`.
 
 
 

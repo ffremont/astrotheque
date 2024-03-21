@@ -7,22 +7,22 @@ export default defineConfig({
     server: {
         proxy: {
             '/api': {
-                target: 'http://localhost:8080',
+                target: 'http://localhost:9999',
                 changeOrigin: true,
                 secure: false,
             },
             '/install': {
-                target: 'http://localhost:8080',
+                target: 'http://localhost:9999',
                 changeOrigin: true,
                 secure: false,
             },
             '/login': {
-                target: 'http://localhost:8080',
+                target: 'http://localhost:9999',
                 changeOrigin: true,
                 secure: false,
             },
             '/logout': {
-                target: 'http://localhost:8080',
+                target: 'http://localhost:9999',
                 changeOrigin: true,
                 secure: false,
             },

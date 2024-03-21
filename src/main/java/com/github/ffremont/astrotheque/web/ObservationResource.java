@@ -8,19 +8,18 @@ import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.core.httpserver.multipart.MultipartUtils;
 import com.github.ffremont.astrotheque.core.httpserver.multipart.Part;
 import com.github.ffremont.astrotheque.service.ObservationService;
-import com.github.ffremont.astrotheque.service.model.FitData;
+import com.github.ffremont.astrotheque.service.model.File;
 import com.github.ffremont.astrotheque.service.model.Nature;
 import com.github.ffremont.astrotheque.service.model.PlanetSatellite;
 import com.github.ffremont.astrotheque.web.model.Observation;
-import com.github.ffremont.astrotheque.web.model.PreviewData;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+
+import static com.github.ffremont.astrotheque.service.utils.FileUtils.*;
 
 @Slf4j
 public class ObservationResource implements HttpHandler {
@@ -32,6 +31,7 @@ public class ObservationResource implements HttpHandler {
             .registerModule(new JavaTimeModule());
 
     private final ObservationService observationService;
+
 
     public ObservationResource(IoC ioC) {
         this.observationService = ioC.get(ObservationService.class);
@@ -49,6 +49,12 @@ public class ObservationResource implements HttpHandler {
                     .map(Part::value)
                     .map(Nature::valueOf)
                     .findFirst().orElseThrow();
+            Boolean useNovaAstrometry = parts.stream().filter(part ->
+                            "analyze".equals(part.name())
+                                    && Objects.nonNull(part.value())
+                    )
+                    .map(Part::value)
+                    .anyMatch("true"::equals);
             Observation obs = parts.stream().filter(part ->
                     "data".equals(part.name())
                             && Objects.nonNull(part.value())
@@ -61,27 +67,44 @@ public class ObservationResource implements HttpHandler {
                         }
                     }).orElseThrow();
 
-            List<FitData> fits = observationService.extractFitData(
-                    exchange.getPrincipal().getUsername(),
-                    parts.stream()
-                            .filter(part -> "fits".equals(part.name()) && Objects.nonNull(part.file()))
-                            .map(part -> Map.entry(part.filename(), part.file()))
-                            .toList());
-            if (fits.isEmpty()) {
-                throw new RuntimeException("Il doit y avoir des fichiers fit");
-            }
+            var allFiles = parts.stream()
+                    .filter(part -> "files".equals(part.name()) && Objects.nonNull(part.file()))
+                    .map(part -> new File(UUID.randomUUID().toString(), part.file(), part.filename(), null))
+                    .toList();
 
-            Observation newObs = obs.toBuilder()
-                    .fits(fits)
-                    .previews(parts.stream()
-                            .filter(part -> "previews".equals(part.name()) && Objects.nonNull(part.file()))
-                            .map(part -> new PreviewData(part.file(), part.filename()))
-                            .toList()
-                    ).build();
+            var pictureFiles = new ArrayList<File>();
+            // TODO si 2 fichiers, un fit et une image alors les lier
+            for (File file : allFiles) {
+                // already added ?
+                if (pictureFiles.stream().anyMatch(s -> s.filename().equals(file.filename())
+                        ||
+                        Optional.ofNullable(s.relatedTo()).map(rf -> rf.filename().equals(file.filename())).orElse(Boolean.FALSE))) {
+                    continue;
+                }
+
+                var filenameWithoutExt = file.filename().substring(0, file.filename().lastIndexOf("."));
+                var twin = allFiles.stream().filter(f -> !f.filename().equals(file.filename()) && f.filename().startsWith(filenameWithoutExt)).findFirst();
+
+                // fichiers jumeaux ont des ext. différentes
+                if (twin.isPresent() && !extensionOf.apply(file.filename()).equalsIgnoreCase(twin.get().filename())) {
+                    if (isFit.test(file.filename()) && isImage.test(twin.get().filename())) {
+                        pictureFiles.add(file.toBuilder().relatedTo(twin.get()).build());
+                    } else if (isFit.test(file.filename()) && !isImage.test(twin.get().filename())) {
+                        pictureFiles.add(file);
+                    } else if (isImage.test(file.filename()) && isFit.test(twin.get().filename())) {
+                        pictureFiles.add(twin.get().toBuilder().relatedTo(file).build());
+                    }
+                } else {
+                    pictureFiles.add(file);
+                }
+            }
+            Observation newObs = obs.toBuilder().files(pictureFiles).build();
 
             if (Nature.DSO.equals(nature)) {
                 log.info("DSO > Importation basé sur nova astrometry");
                 observationService.newDsoObservation(exchange.getPrincipal().getUsername(), newObs);
+
+                //todo useNovaAstrometry
             } else if (Nature.PLANET_SATELLITE.equals(nature)) {
                 PlanetSatellite planetSatellite = parts.stream().filter(part ->
                                 "planetSatellite".equals(part.name())
