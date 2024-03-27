@@ -33,7 +33,7 @@ export const PictureForm = () => {
             if (key === 'tags') {
                 data[key] = (v as string).split(',').map(cel => cel.trim());
             } else {
-                data[key] = v;
+                data[key] = v === '' ? null : v;
             }
 
         });
@@ -91,7 +91,6 @@ export const PictureForm = () => {
                     defaultValue={picture.constellation}
                     label="Constellation"
                     className="field"
-                    required
                     name="constellation"
                     variant="standard"
                     fullWidth
@@ -102,7 +101,6 @@ export const PictureForm = () => {
                     margin="dense"
                     label="Tags"
                     className="field"
-                    required
                     type="text"
                     name="tags"
                     fullWidth
@@ -122,7 +120,6 @@ export const PictureForm = () => {
                 <TextField
                     margin="dense"
                     label="Date"
-                    required
                     className="field"
                     type="datetime-local"
                     name="dateObs"
@@ -146,7 +143,6 @@ export const PictureForm = () => {
                 <TextField
                     margin="dense"
                     label="Gain"
-                    required
                     type="number"
                     name="gain"
                     className="field"
@@ -157,7 +153,6 @@ export const PictureForm = () => {
                 <TextField
                     margin="dense"
                     label="Exposure"
-                    required
                     type="number"
                     name="exposure"
                     className="field"
@@ -190,7 +185,6 @@ export const PictureForm = () => {
                 <TextField
                     margin="dense"
                     label="Camera"
-                    required
                     type="text"
                     className="field"
                     fullWidth
@@ -223,7 +217,6 @@ export const PictureForm = () => {
                     fullWidth
                     name="moonPhase"
                     className="field"
-                    required
                     label="Moon phase"
                 >
                     {Object.keys(MoonPhases).map(key => <MenuItem value={key} key={key}>{MoonPhases[key]}</MenuItem>)}
@@ -259,7 +252,7 @@ export const PictureForm = () => {
             </Paper>
 
             <Box className="form-actions">
-                <Button>Annuler</Button>
+                <Button onClick={() => navigate('/')}>Annuler</Button>
                 <Button type="submit" disabled={loading} variant="contained">Mettre à jour</Button>
                 {loading && (
                     <CircularProgress

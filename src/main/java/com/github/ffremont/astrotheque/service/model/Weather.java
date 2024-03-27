@@ -8,11 +8,11 @@ public enum Weather {
 
     String label;
 
-    Weather(String label){
+    Weather(String label) {
         this.label = label;
     }
 
-    public String label(){
+    public String label() {
         return this.label;
     }
 }

@@ -1,10 +1,7 @@
 package com.github.ffremont.astrotheque.service;
 
 import com.github.ffremont.astrotheque.core.IoC;
-import com.github.ffremont.astrotheque.service.model.File;
-import com.github.ffremont.astrotheque.service.model.FitData;
-import com.github.ffremont.astrotheque.service.model.Picture;
-import com.github.ffremont.astrotheque.service.model.PictureState;
+import com.github.ffremont.astrotheque.service.model.*;
 import com.github.ffremont.astrotheque.web.model.Observation;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
@@ -13,10 +10,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -44,28 +40,13 @@ public class ObservationService {
 
 
     /**
-     * Extrait des fichiers .FIT les méta données
-     *
-     * @param accountName
-     * @param paths
-     * @return
-     */
-    public List<FitData> extractFitData(String accountName, List<Map.Entry<String, Path>> paths) {
-        return paths.stream()
-                .filter(file -> file.getValue().getFileName().toString().endsWith(".fit"))
-                .map(fitMapper)
-                .filter(fit -> !pictureService.has(accountName, fit.getHash()))
-                .toList();
-    }
-
-    /**
      * Mémorise en live l'image sans la version image annotée
      *
      * @param accountName
      * @param observation
      */
-    public void newPlanetSatelliteObservation(String accountName, Observation observation) {
-        log.info("{} / 🔭 Nouvelle observation planète ou satellite", accountName);
+    public void newDirectObservation(String accountName, Observation observation) {
+        log.info("{} / 🔭 Nouvelle observation ", accountName);
 
         for (File file : observation.files()) {
             // il faut une image et un fit
@@ -78,6 +59,7 @@ public class ObservationService {
 
             var thumbnail = new ByteArrayOutputStream();
             try {
+                var planetSatellite = Optional.ofNullable(observation.planetSatellite());
                 Thumbnails.of(image.tempFile().toFile())
                         .size(512, 512)
                         .outputFormat("jpg")
@@ -85,16 +67,16 @@ public class ObservationService {
                 Picture picture = Picture.builder()
                         .id(UUID.randomUUID().toString())
                         .planetSatellite(observation.planetSatellite())
-                        .name(observation.planetSatellite().getLabel())
+                        .name(planetSatellite.map(PlanetSatellite::getLabel).orElse("inconnu"))
                         .state(PictureState.DONE)
                         .filename(file.filename())
                         .imported(LocalDateTime.now())
                         .instrument(observation.instrument())
-                        .tags(List.of(observation.planetSatellite().name()))
+                        .tags(planetSatellite.isPresent() ? List.of(observation.planetSatellite().name()) : Collections.emptyList())
                         .state(PictureState.DONE)
                         .weather(observation.weather())
                         .location(observation.location())
-                        .type(observation.planetSatellite().getType())
+                        .type(planetSatellite.map(PlanetSatellite::getType).orElse(Type.OTHER))
                         .stackCnt(1)
                         .build();
 
@@ -104,16 +86,16 @@ public class ObservationService {
                         null
                 );
 
-                log.info("{} / 🔭✅ importation planète ou satellite", accountName);
+                log.info("{} / 🔭✅ importation direct", accountName);
             } catch (IOException e) {
-                log.error("{} / 🔭❌ importation planète ou satellite", accountName, e);
+                log.error("{} / 🔭❌ importation direct", accountName, e);
                 throw new RuntimeException(accountName + " / thumb génération impossible", e);
             }
         }
     }
 
 
-    public void newDsoObservation(String accountName, Observation obs) {
+    public void newDsoObservationWithAstrometry(String accountName, Observation obs) {
         Observation newObs = obs.toBuilder().id(UUID.randomUUID().toString()).build();
 
         // persist ids

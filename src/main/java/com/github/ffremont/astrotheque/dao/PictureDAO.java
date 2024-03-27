@@ -99,7 +99,7 @@ public class PictureDAO {
                         hashOfRaw.equals(stringPictureEntry.getValue().getData().getHash()));
     }
 
-    
+
     public void allocate(String owner, Observation obs) {
         for (com.github.ffremont.astrotheque.service.model.File file : obs.files()) {
             DATASTORE.put(file.id(), new Belong<>(owner, Picture.builder().id(file.id())

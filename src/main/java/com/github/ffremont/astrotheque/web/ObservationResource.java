@@ -73,7 +73,7 @@ public class ObservationResource implements HttpHandler {
                     .toList();
 
             var pictureFiles = new ArrayList<File>();
-            // TODO si 2 fichiers, un fit et une image alors les lier
+
             for (File file : allFiles) {
                 // already added ?
                 if (pictureFiles.stream().anyMatch(s -> s.filename().equals(file.filename())
@@ -83,28 +83,40 @@ public class ObservationResource implements HttpHandler {
                 }
 
                 var filenameWithoutExt = file.filename().substring(0, file.filename().lastIndexOf("."));
-                var twin = allFiles.stream().filter(f -> !f.filename().equals(file.filename()) && f.filename().startsWith(filenameWithoutExt)).findFirst();
+                var twinWithSameName = allFiles.stream().filter(f -> !f.filename().equals(file.filename()) && f.filename().startsWith(filenameWithoutExt))
+                        .findFirst();
 
                 // fichiers jumeaux ont des ext. différentes
-                if (twin.isPresent() && !extensionOf.apply(file.filename()).equalsIgnoreCase(twin.get().filename())) {
-                    if (isFit.test(file.filename()) && isImage.test(twin.get().filename())) {
-                        pictureFiles.add(file.toBuilder().relatedTo(twin.get()).build());
-                    } else if (isFit.test(file.filename()) && !isImage.test(twin.get().filename())) {
+                if (twinWithSameName.isPresent() && !extensionOf.apply(file.filename()).equalsIgnoreCase(twinWithSameName.get().filename())) {
+                    if (isFit.test(file.filename()) && isImage.test(twinWithSameName.get().filename())) {
+                        pictureFiles.add(file.toBuilder().relatedTo(twinWithSameName.get()).build());
+                    } else if (isFit.test(file.filename()) && !isImage.test(twinWithSameName.get().filename())) {
                         pictureFiles.add(file);
-                    } else if (isImage.test(file.filename()) && isFit.test(twin.get().filename())) {
-                        pictureFiles.add(twin.get().toBuilder().relatedTo(file).build());
+                    } else if (isImage.test(file.filename()) && isFit.test(twinWithSameName.get().filename())) {
+                        pictureFiles.add(twinWithSameName.get().toBuilder().relatedTo(file).build());
                     }
                 } else {
-                    pictureFiles.add(file);
+                    var fit = allFiles.stream().filter(f ->
+                            isFit.test(f.filename())
+                    ).findFirst();
+                    var image = allFiles.stream().filter(f -> isImage.test(f.filename())
+                    ).findFirst();
+                    if (allFiles.size() == 2 && fit.isPresent() && image.isPresent()) {
+                        pictureFiles.add(fit.get().toBuilder().relatedTo(image.get()).build());
+                    } else {
+                        pictureFiles.add(file);
+                    }
                 }
             }
             Observation newObs = obs.toBuilder().files(pictureFiles).build();
 
-            if (Nature.DSO.equals(nature)) {
+            if (Nature.DSO.equals(nature) && useNovaAstrometry) {
                 log.info("DSO > Importation basé sur nova astrometry");
-                observationService.newDsoObservation(exchange.getPrincipal().getUsername(), newObs);
+                observationService.newDsoObservationWithAstrometry(exchange.getPrincipal().getUsername(), newObs);
+            } else if (Nature.DSO.equals(nature)) {
+                log.info("DSO > Importation SANS nova astrometry");
 
-                //todo useNovaAstrometry
+                observationService.newDirectObservation(exchange.getPrincipal().getUsername(), newObs);
             } else if (Nature.PLANET_SATELLITE.equals(nature)) {
                 PlanetSatellite planetSatellite = parts.stream().filter(part ->
                                 "planetSatellite".equals(part.name())
@@ -113,7 +125,7 @@ public class ObservationResource implements HttpHandler {
                         .map(Part::value)
                         .map(PlanetSatellite::valueOf)
                         .findFirst().orElseThrow();
-                observationService.newPlanetSatelliteObservation(exchange.getPrincipal().getUsername(),
+                observationService.newDirectObservation(exchange.getPrincipal().getUsername(),
                         newObs.toBuilder()
                                 .planetSatellite(planetSatellite)
                                 .build()
@@ -121,6 +133,8 @@ public class ObservationResource implements HttpHandler {
             } else {
                 throw new RuntimeException("Pas implémenté");
             }
+        } catch (Exception e) {
+            log.warn("{} / Une erreur est survenue lors de la prise en charge de la demande", exchange.getPrincipal().getUsername(), e);
         } finally {
             //MultipartUtils.clear(parts);
             exchange.sendResponseHeaders(204, -1);

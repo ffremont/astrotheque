@@ -11,11 +11,12 @@ public enum MoonPhase {
     WANING_CRESCENT("Dernier quartier");// dernier croissant
 
     String label;
-    MoonPhase(String label){
+
+    MoonPhase(String label) {
         this.label = label;
     }
 
-    public String label(){
+    public String label() {
         return this.label;
     }
 }

@@ -10,7 +10,7 @@ export const Error = () => {
   return (
     <Container maxWidth="sm">
       <Typography variant="h4" gutterBottom>
-        <BugReportIcon/>Oups, une erreur est surevenue
+        <BugReportIcon/>Oups, une erreur est survenue
       </Typography>
       <Typography variant="body1" gutterBottom>
         Veuillez réitérer, si le problème persiste, veuillez contacter la administrateur.

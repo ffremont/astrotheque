@@ -13,5 +13,6 @@ public record DataEntry(String datasetid, Fields fields) {
 
             String type,
             @JsonProperty("v_mag")
-            String magnitude){}
+            String magnitude) {
+    }
 }
