@@ -34,7 +34,7 @@ export const Importation = () => {
         defaultValues: {
             nature: 'DSO',
             planetSatellite: 'MOON',
-            analyze: true
+            analyze: 'true'
         }
 
     })

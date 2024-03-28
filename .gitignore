@@ -6,4 +6,4 @@ dist
 node
 data
 .vscode
-platforms
+platforms/macos/aarch64

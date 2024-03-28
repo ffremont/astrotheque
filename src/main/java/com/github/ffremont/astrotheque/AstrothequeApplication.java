@@ -30,7 +30,7 @@ import static com.github.ffremont.astrotheque.core.httpserver.route.JsonRoute.*;
 @Slf4j
 public class AstrothequeApplication {
 
-    public final static Path HTML_DIR = Paths.get("./dist").toAbsolutePath();
+    public final static Path HTML_DIR = Paths.get(Optional.ofNullable(System.getenv("HTML_DIST")).orElse("./dist")).toAbsolutePath();
 
     /**
      * @param args
