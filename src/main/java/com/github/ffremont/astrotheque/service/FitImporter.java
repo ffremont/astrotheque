@@ -65,6 +65,17 @@ public class FitImporter implements Runnable {
     }
 
 
+    /**
+     * Vérifie que l'observation n'a pas été black listé
+     *
+     * @param obs
+     */
+    private void checkObservation(Observation obs) {
+        if (pictureService.isBlackListed(observation.id())) {
+            throw new RuntimeException("Observation on blacklist : " + observation.id());
+        }
+    }
+
     public void run() {
         log.info("{} / ⚙️ Importation {}", owner, observation.id());
         var sessionId = astrometryDAO.createLoginSession(astrometryNovaApikey);
@@ -82,6 +93,8 @@ public class FitImporter implements Runnable {
 
             var pictureId = file.id();
             try {
+                checkObservation(observation);
+
                 if (Objects.isNull(sessionId)) {
                     throw new ImportProcessException("Session id nova astrometry null");
                 }
@@ -97,6 +110,7 @@ public class FitImporter implements Runnable {
                     log.info("{}/ waiting for {}", owner, pictureId);
                     Thread.sleep(TEMPO_MS);
                     counter++;
+                    checkObservation(observation);
 
                     var subInfo = astrometryDAO.getSubInfo(submissionId);
                     log.info("{} / ✅ getting subInfo of {}", owner, submissionId);

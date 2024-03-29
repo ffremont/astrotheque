@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
 import static java.nio.file.Files.walk;
@@ -38,6 +39,8 @@ public class PictureDAO {
 
     private final static ConcurrentHashMap<String, Belong<Picture>> DATASTORE = new ConcurrentHashMap<>();
 
+    private final static ConcurrentLinkedQueue<String> BLACKLIST_OBS_ID = new ConcurrentLinkedQueue<>();
+
     private final static ObjectMapper JSON = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
@@ -49,6 +52,28 @@ public class PictureDAO {
 
     public PictureDAO(IoC ioC) {
         this.dataDir = ioC.get(DynamicProperties.class).getDataDir();
+    }
+
+    /**
+     * Black list une session d'observation
+     *
+     * @param obsId
+     */
+    public void blackListObservationId(String obsId) {
+        if (!BLACKLIST_OBS_ID.contains(obsId)
+                && DATASTORE.values().stream().anyMatch(pictureBelong -> obsId.equals(pictureBelong.getData().getObservationId()))) {
+            BLACKLIST_OBS_ID.add(obsId);
+        }
+    }
+
+    /**
+     * Retourne vrai si l'observation Id a été identifié comme "blacklisté"
+     *
+     * @param obsId
+     * @return
+     */
+    public boolean isBlackListed(String obsId) {
+        return BLACKLIST_OBS_ID.contains(obsId);
     }
 
     /**

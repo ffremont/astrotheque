@@ -40,6 +40,32 @@ public class PictureService {
         return picture;
     }
 
+    /**
+     * Black list une session d'observation
+     *
+     * @param obsId
+     */
+    public void blackListObservationId(String obsId) {
+        dao.blackListObservationId(obsId);
+    }
+
+    /**
+     * Retourne vrai si l'observation Id a été identifié comme "blacklisté"
+     *
+     * @param obsId
+     * @return
+     */
+    public boolean isBlackListed(String obsId) {
+        return dao.isBlackListed(obsId);
+    }
+
+
+    /**
+     * Sauvegarde les images d'une observation afin de les mettre à jour ultérieurement
+     *
+     * @param owner
+     * @param obs
+     */
     public void allocate(String owner, Observation obs) {
         dao.allocate(owner, obs);
     }

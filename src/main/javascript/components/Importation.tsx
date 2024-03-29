@@ -196,7 +196,7 @@ export const Importation = () => {
         </Alert>}
 
         <Box className="form-actions">
-            <Button>Annuler</Button>
+            <Button onClick={() => navigate('/')}>Annuler</Button>
             <Button type="submit" disabled={loading} variant="contained">Importer</Button>
             {loading && (
                 <CircularProgress

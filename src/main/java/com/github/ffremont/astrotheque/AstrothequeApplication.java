@@ -51,6 +51,7 @@ public class AstrothequeApplication {
         var loginResource = ioc.get(LoginResource.class);
         var meResource = ioc.get(MeResource.class);
         var confResource = ioc.get(ConfigurationResource.class);
+        var newObsResource = ioc.get(NewObservationResource.class);
         var obsResource = ioc.get(ObservationResource.class);
 
         HttpServer server = HttpServer.create(new InetSocketAddress(dynamicProperties.getPort()), 0);
@@ -70,7 +71,7 @@ public class AstrothequeApplication {
                         post("", loginResource::logout, Empty.class)
                 ))
                 .setAuthenticator(ioc.get(AstroAuthenticator.class));
-        server.createContext("/api/observation", obsResource)
+        server.createContext("/api/observation", newObsResource)
                 .setAuthenticator(ioc.get(AstroAuthenticator.class));
 
         server.createContext("/api", SimpleContext.with(
@@ -78,6 +79,9 @@ public class AstrothequeApplication {
                         patch("/config", confResource::updateConfig, Configuration.class),
                         get("/me", meResource::myProfil),
                         put("/me/password", meResource::updatePassword, NewPassword.class),
+
+                        delete("/observations/([\\w\\-]+)", obsResource::blackList),
+
                         get("/pictures$", pictureRessource::all),
                         get("/pictures/([\\w\\-]+)$", pictureRessource::get),
                         delete("/pictures/([\\w\\-]+)", pictureRessource::delete),

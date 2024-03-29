@@ -207,6 +207,7 @@ export const PictureForm = () => {
                     className="field"
                     required
                     name="weather"
+                    variant="standard"
                     fullWidth
                 >
                     {Object.keys(Weathers).map(key => <MenuItem key={key} value={key}>{Weathers[key]}</MenuItem>)}
@@ -217,6 +218,7 @@ export const PictureForm = () => {
                     fullWidth
                     name="moonPhase"
                     className="field"
+                    variant="standard"
                     label="Moon phase"
                 >
                     {Object.keys(MoonPhases).map(key => <MenuItem value={key} key={key}>{MoonPhases[key]}</MenuItem>)}

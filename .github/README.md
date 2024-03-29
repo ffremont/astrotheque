@@ -67,8 +67,14 @@ Pour configurer l'application, vous pouvez utiliser des variables d'environnemen
 - `ASTROMETRY_NOVA_BASEURL`: URL de base pour Astrometry Nova. Par défaut, `https://nova.astrometry.net`.
 - `PORT`: Port sur lequel l'application écoutera. Par défaut, `9999`.
 
+## Support
 
+## Vie privée
 
+stockées sur le serveur (self)
+Attribution-NonCommercial 3.0 Unported https://creativecommons.org/licenses/by-nc/3.0/
+privée
+stockage chiffré (mots de passe et apikey) AES/ECB/PKCS5Padding
 
 
    
