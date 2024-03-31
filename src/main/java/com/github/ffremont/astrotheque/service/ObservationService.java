@@ -82,7 +82,7 @@ public class ObservationService {
 
                 pictureService.save(accountName, picture, Files.newInputStream(image.tempFile()),
                         new ByteArrayInputStream(thumbnail.toByteArray()),
-                        Files.newInputStream(fit.tempFile()),
+                        Files.newInputStream(fit.tempFile()), null,
                         null
                 );
 

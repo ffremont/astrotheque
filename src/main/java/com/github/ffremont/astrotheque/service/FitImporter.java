@@ -3,10 +3,7 @@ package com.github.ffremont.astrotheque.service
 
 import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.dao.AstrometryDAO;
-import com.github.ffremont.astrotheque.service.model.CelestObject;
-import com.github.ffremont.astrotheque.service.model.File;
-import com.github.ffremont.astrotheque.service.model.FitData;
-import com.github.ffremont.astrotheque.service.model.PictureState;
+import com.github.ffremont.astrotheque.service.model.*;
 import com.github.ffremont.astrotheque.web.model.Observation;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
@@ -14,6 +11,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -90,6 +88,7 @@ public class FitImporter implements Runnable {
             var fit = Optional.of(file)
                     .filter(f -> isFit.test(f.filename()))
                     .or(() -> Optional.ofNullable(file.relatedTo()));
+            Optional<File> astrometryFit = Optional.empty();
 
             var pictureId = file.id();
             try {
@@ -134,8 +133,17 @@ public class FitImporter implements Runnable {
                         log.info("{} / ✅ getting info of job {}", owner, jobId.get());
                     }
 
+                    if (fit.isPresent()) {
+                        log.info("{} / ⬇ download astrometry fit (new-fit)", owner);
+                        Path newAstrometryFit = Files.createTempFile("astrotheque_astrometry_new_", ".fit");
+                        FileUtils.copyInputStreamToFile(astrometryDAO.getFit(jobId.get()), newAstrometryFit.toFile());
+                        astrometryFit = Optional.of(new File(UUID.randomUUID().toString(), newAstrometryFit, newAstrometryFit.toFile().getName(), fit.get()));
+                        log.info("{} / ✅ downloaded astrometry fit (new-fit)", owner);
+                    }
+
                     var thumbnail = new ByteArrayOutputStream();
-                    Integer astroNovaImage;
+
+                    Integer astroNovaImage = Optional.ofNullable(subInfo.images()).flatMap(images -> images.stream().findFirst()).orElseThrow();
                     if (fit.isPresent() && image.isPresent()) {
                         log.info("{} / ⚙️building thumb from image {}", owner, image.get().filename());
                         Thumbnails.of(image.get().tempFile().toFile())
@@ -145,7 +153,6 @@ public class FitImporter implements Runnable {
                     } else if (fit.isPresent()) {
                         log.info("{} / ⬇ download image to define preview...", owner);
 
-                        astroNovaImage = Optional.ofNullable(subInfo.images()).flatMap(images -> images.stream().findFirst()).orElseThrow();
                         Path novaImageFile = Files.createTempFile("astrotheque_", ".jpg");
                         FileUtils.copyInputStreamToFile(astrometryDAO.getImage(astroNovaImage), novaImageFile.toFile());
 
@@ -162,7 +169,7 @@ public class FitImporter implements Runnable {
                         Path novaRawFile = Files.createTempFile("astrotheque_", ".fit");
                         FileUtils.copyInputStreamToFile(astrometryDAO.getFit(jobId.get()), novaRawFile.toFile());
                         fit = Optional.of(new File(UUID.randomUUID().toString(), novaRawFile, novaRawFile.toFile().getName(), image.get()));
-                        log.info("{} / ✅ fit defined", owner);
+                        log.info("{} / ✅ fit downloaded and defined", owner);
 
                         log.info("{} / ⚙️ Building thumb from image...", owner);
                         Thumbnails.of(Files.newInputStream(image.get().tempFile()))
@@ -196,7 +203,11 @@ public class FitImporter implements Runnable {
                             .location(observation.location())
                             .type(celest.map(CelestObject::type).orElse(null))
                             .stackCnt(fitData.getStackCnt())
-                            .novaAstrometryReportUrl(astrometryDAO.reportUrlOf(subInfo))
+                            .novaAstrometry(Picture.NovaAstrometry.builder()
+                                    .jobId(jobId.get())
+                                    .submission(submissionId)
+                                    .image(astroNovaImage)
+                                    .build())
                             .build();
                     log.info("{} / ⬇ getting annotated image...", owner);
                     var annotated = astrometryDAO.getAnnotatedImage(jobId.get());
@@ -209,6 +220,13 @@ public class FitImporter implements Runnable {
                             Files.newInputStream(image.get().tempFile()),
                             new ByteArrayInputStream(thumbnail.toByteArray()),
                             Files.newInputStream(fit.get().tempFile()),
+                            astrometryFit.map(afit -> {
+                                try {
+                                    return Files.newInputStream(afit.tempFile());
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }).orElse(null),
                             annotated
                     );
                     log.info("{}/ ✅🥳 Picture {} ({}) saved !", owner, pictureId, fit.get().filename());
@@ -222,6 +240,9 @@ public class FitImporter implements Runnable {
                         f.tempFile().toFile().delete();
                     });
                     image.ifPresent(f -> {
+                        f.tempFile().toFile().delete();
+                    });
+                    astrometryFit.ifPresent(f -> {
                         f.tempFile().toFile().delete();
                     });
                 } catch (RuntimeException ee) {

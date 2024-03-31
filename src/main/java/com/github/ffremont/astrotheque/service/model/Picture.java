@@ -34,7 +34,7 @@ public class Picture implements Comparable<Picture> {
     List<String> tags;
     String constellation;
     String hash;
-    String novaAstrometryReportUrl;
+    NovaAstrometry novaAstrometry;
     Float ra;
     Float dec;
     Type type;
@@ -46,12 +46,25 @@ public class Picture implements Comparable<Picture> {
      * arcsec/pixel
      */
     Float pixscale;
+
     String note;
 
     List<String> webTags;
 
+    Long size;
+
     @Override
     public int compareTo(Picture o) {
         return this.dateObs.compareTo(o.dateObs);
+    }
+
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    public static class NovaAstrometry {
+        Integer jobId;
+        Integer image;
+        Integer submission;
     }
 }

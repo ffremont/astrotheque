@@ -15,18 +15,19 @@ import { fromList } from "../utils/pictureInAlbumFactory";
 import { CriteriaNames, allCriteria } from "../types/Criteria";
 import PhotoAlbum from "react-photo-album";
 import { Item } from "../types/Item";
-import {  Note } from "../libs/yet-another-react-lightbox/plugins/note/Note";
+import { Note } from "../libs/yet-another-react-lightbox/plugins/note/Note";
 import { useAstrotheque } from "../hooks/useAstrotheque";
 import { Binaries } from "../libs/yet-another-react-lightbox/plugins/binaries/Binaries";
+import { Footer } from "./Layout/Footer";
 
 const donePictures = (pictures: Picture[]) => pictures.filter(p => p.state === 'DONE');
 
 export const Home = () => {
     const [index, setIndex] = useState(-1);
     const { state } = useLocation();
-    const {pictures, setPictures} = useAstrotheque();
+    const { pictures, setPictures } = useAstrotheque();
     const [picturesInAlbum, setPicturesInAlbum] = useState<(PictureInAlbum)[]>([]);
-    
+
     const myFetch = useFetch();
     const [search, setSearch] = useState<Item | null>(null);
     const [searchIn, setSearchIn] = useState<Item[]>([]);
@@ -41,12 +42,12 @@ export const Home = () => {
     }, [criteria]);
 
     useEffect(() => {
-        
-        if(search && criteria){
+
+        if (search && criteria) {
             const myCriteria = allCriteria.find(c => c.name === criteria);
 
-            setPicturesInAlbum(fromList(myCriteria?.filter(search.value, donePictures(pictures))||[]))
-        }else{
+            setPicturesInAlbum(fromList(myCriteria?.filter(search.value, donePictures(pictures)) || []))
+        } else {
             setPicturesInAlbum(fromList(donePictures(pictures)));
         }
     }, [search, criteria])
@@ -134,5 +135,6 @@ export const Home = () => {
                 </Link>
             </Box>
 
+            <Footer version={import.meta.env.VITE_REACT_APP_VERSION} totalBytes={picturesInAlbum.map(p=> p.data.size ||0).reduce((a,b) => a+b, 0)} totalItems={picturesInAlbum.length} />
         </Box>)
 }

@@ -18,6 +18,7 @@ export type Picture = {
     exposure: number
     gain: number
     note:string
+    size:number
 
     stackCnt: number
     tags: string[]

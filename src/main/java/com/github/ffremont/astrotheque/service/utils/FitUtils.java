@@ -23,9 +23,11 @@ public class FitUtils {
             hdu = (new Fits(fitFile.toAbsolutePath().toFile())).readHDU();
 
             // from fit header or creation file date
-            var dateObs = Optional.ofNullable(hdu.getHeader().findCard("DATE-OBS").getValue())
+            var dateObs = Optional.ofNullable(
+                            hdu.getHeader()).map(header -> Optional.ofNullable(header.findCard("DATE-OBS")).orElse(header.findCard("DATE"))).map(c -> c.getValue())
                     .filter(Predicate.not(String::isEmpty))
                     .map(LocalDateTime::parse);
+            ;
 
             return FitData.builder()
                     .tempFile(fitFile)

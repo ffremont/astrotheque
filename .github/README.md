@@ -22,7 +22,8 @@
 * **Fichiers**: importation des fichiers au format FIT pour une session d'observation
 * **Analyse DSO**: analyse automatique à l'aide de la solution nova astrometry
 * **Mise à jour** : édition avancer (constellation, exposition, stacking count,...)
-* **Dépôt**: téléversement des fichiers FIT mais aussi des image JPG associées
+* **Dépôt simple**: téléversement une image JPG/PNG/FIT, et l'astrometry fera le reste
+* **Dépôt complet**: téléversement le FIT et l'image aperçu que vous avez retravaillé
 * **Hébergement**: installer sur votre poste ou sur un serveur l'application
 * **Suivi**: suivi des analyses dans le temps via le menu latéral
 * **Lune**: calcule automatique de la lunaison sur la base de la date
@@ -48,7 +49,7 @@ Pour plus de fiabilité, vous pouvez synchroniser ce répertoire avec le cloud d
 
 ### Serveur
 
-En mode serveur basé sur Docker est disponible afin de pouvoir disposer d'une instance personnalisée.
+Le mode serveur est basé sur Docker et vous permet de disposer d'une instance personnalisée.
 
 * Récupérer l'image [floorent/astrotheque](https://hub.docker.com/r/floorent/astrotheque)
 * Personnaliser `SECRET` / `DATA_DIR`
@@ -69,12 +70,14 @@ Pour configurer l'application, vous pouvez utiliser des variables d'environnemen
 
 ## Support
 
+En cas d'incident, merci de compléter le [formulaire en ligne](https://forms.gle/iUGUdCc9q3zUH2HZA).
+
 ## Vie privée
 
-stockées sur le serveur (self)
-Attribution-NonCommercial 3.0 Unported https://creativecommons.org/licenses/by-nc/3.0/
-privée
-stockage chiffré (mots de passe et apikey) AES/ECB/PKCS5Padding
-
-
+- Stockage sur le serveur lui-même, placé sous votre entière responsabilité pour un contrôle d'accès.
+- Utilisation du chiffrement AES avec le mode ECB et le padding PKCS5 pour sécuriser les données sensibles telles que
+  les logins et les API keys.
+- Garantie de la sécurité des données et respect des paramètres de confidentialité de la
+  plate-forme https://astrometry.net/, assurant un paramétrage "non public" et un usage non commercial des photographies
+  déposées.
    

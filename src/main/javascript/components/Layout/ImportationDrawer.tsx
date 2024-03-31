@@ -72,7 +72,7 @@ export const ImporationDrawer = ({ open, onClose }: ImportationDrawerProps) => {
                 </p>}
             </List>
             <Box textAlign="center">
-                <Button disabled={recentPicturesList.length === 0 || !recentPicturesList.every(p => p.state !== 'PENDING')} variant="contained" color="primary" onClick={handleCancelAll}>Tout annuler</Button>
+                <Button disabled={recentPicturesList.length === 0 || !recentPicturesList.every(p => p.state === 'PENDING')} variant="contained" color="primary" onClick={handleCancelAll}>Tout annuler</Button>
             </Box>
         </Box>
     </Drawer>)

@@ -11,6 +11,7 @@ import com.github.ffremont.astrotheque.service.model.Picture;
 import com.github.ffremont.astrotheque.service.model.PictureState;
 import com.github.ffremont.astrotheque.web.model.Observation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +34,7 @@ public class PictureDAO {
 
     public final static String THUMB_FILENAME = "thumb.jpg";
     public final static String RAW_FILENAME = "raw.fit";
+    public final static String ASTROMMETRY_RAW_FILENAME = "astrometry-raw.fit";
     public final static String PICTURE_FILENAME = "picture.jpg";
     public final static String DATA_FILENAME = "data.json";
     public final static String ANNOTATED_FILENAME = "annotated.jpg";
@@ -62,7 +64,7 @@ public class PictureDAO {
     public void blackListObservationId(String obsId) {
         if (!BLACKLIST_OBS_ID.contains(obsId)
                 && DATASTORE.values().stream().anyMatch(pictureBelong -> obsId.equals(pictureBelong.getData().getObservationId()))) {
-            BLACKLIST_OBS_ID.add(obsId);
+            BLACKLIST_OBS_ID.offer(obsId);
         }
     }
 
@@ -73,7 +75,7 @@ public class PictureDAO {
      * @return
      */
     public boolean isBlackListed(String obsId) {
-        return BLACKLIST_OBS_ID.contains(obsId);
+        return BLACKLIST_OBS_ID.remove(obsId);
     }
 
     /**
@@ -161,7 +163,14 @@ public class PictureDAO {
      * @param raw
      * @param annotated
      */
-    public void save(String owner, Picture picture, InputStream jpg, InputStream thumb, InputStream raw, InputStream annotated) {
+    public void save(
+            String owner,
+            Picture picture,
+            InputStream jpg,
+            InputStream thumb,
+            InputStream raw,
+            InputStream astrometryRaw,
+            InputStream annotated) {
         final var pictureDir = locationOf(picture.getId(), owner);
 
         try {
@@ -172,13 +181,22 @@ public class PictureDAO {
 
             Files.copy(jpg, pictureDir.resolve(PICTURE_FILENAME));
             Files.copy(raw, pictureDir.resolve(RAW_FILENAME));
+            if (Objects.nonNull(astrometryRaw)) {
+                Files.copy(astrometryRaw, pictureDir.resolve(ASTROMMETRY_RAW_FILENAME));
+            }
+
             if (Objects.nonNull(annotated)) {
                 Files.copy(annotated, pictureDir.resolve(ANNOTATED_FILENAME));
             }
 
-            Files.write(pictureDir.resolve(DATA_FILENAME), JSON.writer().writeValueAsBytes(picture), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+            long size = FileUtils.sizeOfDirectory(pictureDir.toFile());
+            var newPicture = picture.toBuilder()
+                    .size(size)
+                    .build();
 
-            DATASTORE.put(picture.getId(), new Belong<>(owner, picture));
+            Files.write(pictureDir.resolve(DATA_FILENAME), JSON.writer().writeValueAsBytes(newPicture), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+
+            DATASTORE.put(newPicture.getId(), new Belong<>(owner, newPicture));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

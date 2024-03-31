@@ -74,8 +74,8 @@ public class PictureService {
         return dao.has(owner, hashOfRaw);
     }
 
-    public void save(String owner, Picture picture, InputStream jpg, InputStream thumb, InputStream raw, InputStream annotated) {
-        dao.save(owner, picture, jpg, thumb, raw, annotated);
+    public void save(String owner, Picture picture, InputStream jpg, InputStream thumb, InputStream raw, InputStream astrometryRaw, InputStream annotated) {
+        dao.save(owner, picture, jpg, thumb, raw, astrometryRaw, annotated);
     }
 
     public Picture update(String accountName, Picture picture) {
