@@ -4,7 +4,7 @@
   <groupId>com.github.ffremont</groupId>
   <artifactId>astrotheque</artifactId>
   <name>astrotheque</name>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.1.0-SNAPSHOT</version>
   <description>Photothèque en Astronomie Dans le stockage de manière autonome, des photographies astronomiques.</description>
   <build>
     <finalName>${project.name}</finalName>
@@ -36,7 +36,6 @@
                   </excludes>
                 </filter>
               </filters>
-              <minimizeJar>false</minimizeJar>
             </configuration>
           </execution>
         </executions>

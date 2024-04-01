@@ -9,6 +9,6 @@ cp -r ../dbs astrotheque-macos/core/
 cp astrotheque.jar astrotheque-macos/
 cp ../platforms/macos/astrotheque.command astrotheque-macos
 
-zip -vr macos-m1-m2-bundle.zip astrotheque-macos -x "*.DS_Store"
+zip -vr astrotheque-macos-arm-bundle.zip astrotheque-macos -x "*.DS_Store"
 
 cd ..

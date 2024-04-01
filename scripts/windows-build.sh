@@ -7,7 +7,7 @@ cp -r ../platforms/windows/x64/ astrotheque-windows/core/
 cp -r ../dist astrotheque-windows/core/
 cp -r ../dbs astrotheque-windows/core/
 cp astrotheque.jar astrotheque-windows/
-cp ../platforms/windows/Astrotheque.exe astrotheque-windows
+cp ../platforms/windows/Astrotheque.bat astrotheque-windows
 
 zip -vr astrotheque-windows-x64-bundle.zip astrotheque-windows -x "*.DS_Store"
 
