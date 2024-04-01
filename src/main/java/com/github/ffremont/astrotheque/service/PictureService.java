@@ -22,7 +22,7 @@ public class PictureService {
     }
 
     public List<Picture> getAll(String accountName) {
-        return dao.getAll(accountName).toList();
+        return dao.getAll(accountName).sorted().toList().reversed();
     }
 
     public Picture get(String accountName, String id) {

@@ -54,7 +54,7 @@ export const PictureForm = () => {
         {picture && <><Card className="form-intro">
             <CardMedia
                 sx={{ height: 200 }}
-                image={`/api/pictures/thumb/${picture.id}`}
+                image={`/api/pictures/image/${picture.id}`}
                 title="green iguana"
             />
         </Card>

@@ -17,8 +17,17 @@ export const fromList = (pictures: Picture[]): PictureInAlbum[] => {
                       ?.label +
                   ')'
                 : ''
-        }`
-        const description = `Exp. ${formatExpo(picture)} (${
+        }, 🗓️ ${new Intl.DateTimeFormat(
+            'fr-FR',
+            {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+                timeZone: 'Europe/Paris',
+            }
+        ).format(
+            new Date(picture.dateObs || new Date())
+        )} `
+        const description = `Intégration ${formatExpo(picture)} (${
             picture.exposure
         }s x ${picture.stackCnt}) avec ${picture.camera} sur ${
             picture.instrument
@@ -41,8 +50,8 @@ export const fromList = (pictures: Picture[]): PictureInAlbum[] => {
                 title: `🔭 ${picture.name} sur mon Astrothèque`,
             },
             downloadUrl: `/api/pictures/image/${picture.id}`,
-            height: 512,
-            width: 512,
+            height: 1024,
+            width: 1024,
             href: `/api/pictures/${picture.id}`,
             imageId: picture.id,
         }

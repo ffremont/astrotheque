@@ -80,7 +80,7 @@ public class AstrothequeApplication {
                         get("/me", meResource::myProfil),
                         put("/me/password", meResource::updatePassword, NewPassword.class),
 
-                        delete("/observations/([\\w\\-]+)", obsResource::blackList),
+                        delete("/pictures/observation/([\\w\\-]+)", obsResource::blackList),
 
                         get("/pictures$", pictureRessource::all),
                         get("/pictures/([\\w\\-]+)$", pictureRessource::get),

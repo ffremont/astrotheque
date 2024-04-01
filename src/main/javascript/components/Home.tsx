@@ -117,7 +117,7 @@ export const Home = () => {
                     renderPhoto={({ imageProps: { src, alt, style, ...restImageProps } }) => (
                         <img src={src} alt={alt} style={style} {...restImageProps} />
                     )}
-                    photos={picturesInAlbum} layout="columns" targetRowHeight={150} onClick={({ index }) => setIndex(index)} />
+                    photos={picturesInAlbum} layout="rows" targetRowHeight={150} onClick={({ index }) => setIndex(index)} />
 
                 <Lightbox
                     slides={picturesInAlbum}

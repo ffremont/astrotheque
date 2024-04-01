@@ -61,7 +61,7 @@ public class ObservationService {
             try {
                 var planetSatellite = Optional.ofNullable(observation.planetSatellite());
                 Thumbnails.of(image.tempFile().toFile())
-                        .size(512, 512)
+                        .size(1024, 1024)
                         .outputFormat("jpg")
                         .toOutputStream(thumbnail);
                 Picture picture = Picture.builder()

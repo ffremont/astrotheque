@@ -79,7 +79,7 @@ public class FitImporter implements Runnable {
         var sessionId = astrometryDAO.createLoginSession(astrometryNovaApikey);
 
         for (File file : observation.files()) {
-            log.info("{} / ->️ Fit {}", owner, file.filename());
+            log.info("{} / ->️ Fichier {}", owner, file.filename());
             var counter = 0;
 
             var image = Optional.of(file)
@@ -126,11 +126,13 @@ public class FitImporter implements Runnable {
                     }
 
                     var info = astrometryDAO.info(jobId.get());
-                    if (!"success".equals(info.status())) {
+                    if ("solving".equals(info.status())) {
+                        continue;
+                    } else if ("success".equals(info.status())) {
+                        log.info("{} / ✅ getting info of job {}", owner, jobId.get());
+                    } else {
                         log.info("{} / ❌ failed to get info of job {}, current status : {}", owner, jobId.get(), info.status());
                         throw new RuntimeException(" ❌ Job invalid status :" + info.status());
-                    } else {
-                        log.info("{} / ✅ getting info of job {}", owner, jobId.get());
                     }
 
                     if (fit.isPresent()) {
@@ -147,7 +149,7 @@ public class FitImporter implements Runnable {
                     if (fit.isPresent() && image.isPresent()) {
                         log.info("{} / ⚙️building thumb from image {}", owner, image.get().filename());
                         Thumbnails.of(image.get().tempFile().toFile())
-                                .size(512, 512)
+                                .size(1024, 1024)
                                 .outputFormat("jpg")
                                 .toOutputStream(thumbnail);
                     } else if (fit.isPresent()) {
@@ -158,7 +160,7 @@ public class FitImporter implements Runnable {
 
                         log.info("{} / ⚙️ Building thumb from nova image...", owner);
                         Thumbnails.of(Files.newInputStream(novaImageFile))
-                                .size(512, 512)
+                                .size(1024, 1024)
                                 .outputFormat("jpg")
                                 .toOutputStream(thumbnail);
                         image = Optional.of(new File(UUID.randomUUID().toString(), novaImageFile, novaImageFile.toFile().getName(), null));
@@ -173,7 +175,7 @@ public class FitImporter implements Runnable {
 
                         log.info("{} / ⚙️ Building thumb from image...", owner);
                         Thumbnails.of(Files.newInputStream(image.get().tempFile()))
-                                .size(512, 512)
+                                .size(1024, 1024)
                                 .outputFormat("jpg")
                                 .toOutputStream(thumbnail);
                     }
@@ -238,15 +240,18 @@ public class FitImporter implements Runnable {
                     pictureService.cancel(owner, pictureId);
                     fit.ifPresent(f -> {
                         f.tempFile().toFile().delete();
+                        log.info("{}/ Effacement du fit temp", owner);
                     });
                     image.ifPresent(f -> {
                         f.tempFile().toFile().delete();
+                        log.info("{}/ Effacement de l'image temp", owner);
                     });
                     astrometryFit.ifPresent(f -> {
                         f.tempFile().toFile().delete();
+                        log.info("{}/ Effacement du astrometry fit temp", owner);
                     });
                 } catch (RuntimeException ee) {
-                    log.error("{}/ Effacement impossible de l'image FIT/JPG/ {}", owner, pictureId, ee);
+                    log.error("{}/ Effacement impossible des fichiers FIT/JPG... {}", owner, pictureId, ee);
                 }
             }
         }

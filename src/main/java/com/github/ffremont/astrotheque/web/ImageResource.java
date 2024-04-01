@@ -31,6 +31,7 @@ public class ImageResource {
         String id = wrapper.pathParams().stream().findFirst().orElseThrow();
         try {
             Path thumb = dao.getBin(wrapper.httpExchange().getPrincipal().getUsername(), id, PictureDAO.THUMB_FILENAME);
+            wrapper.httpExchange().getResponseHeaders().add("Cache-Control", "max-age=3600");
             return new Stream(Files.newInputStream(thumb), thumb.toFile().length());
         } catch (IOException e) {
             throw new RuntimeException(e);

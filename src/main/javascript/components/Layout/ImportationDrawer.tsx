@@ -20,12 +20,12 @@ export const ImporationDrawer = ({ open, onClose }: ImportationDrawerProps) => {
     const handleCancelAll = () => {
         const firstPicturePending = recentPictures(pictures).find(picture => picture.state === 'PENDING')
         if (firstPicturePending && window.confirm(`Confirmez-vous l'annulation ?`)) {
-            myFetch.delete(`/api/observations/${firstPicturePending.observationId}`)
+            myFetch.delete(`/api/pictures/observation/${firstPicturePending.observationId}`)
                 .then(() => {
                     setNotification({
                         type: 'success',
-                        title: 'Annulation',
-                        message: 'Toute votre session a été annulée.'
+                        title: 'Tentative d\'annulation',
+                        message: 'Votre session sera annulée.'
                     })
                 })
                 .catch(() => {
@@ -72,7 +72,7 @@ export const ImporationDrawer = ({ open, onClose }: ImportationDrawerProps) => {
                 </p>}
             </List>
             <Box textAlign="center">
-                <Button disabled={recentPicturesList.length === 0 || !recentPicturesList.every(p => p.state === 'PENDING')} variant="contained" color="primary" onClick={handleCancelAll}>Tout annuler</Button>
+                <Button disabled={recentPicturesList.length === 0 || !recentPicturesList.some(p => p.state === 'PENDING')} variant="contained" color="primary" onClick={handleCancelAll}>Tout annuler</Button>
             </Box>
         </Box>
     </Drawer>)

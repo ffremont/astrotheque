@@ -216,17 +216,25 @@ public class PictureDAO {
     }
 
     public void cancel(String owner, String pictureId) {
+        log.info("{} / Annulation d'image {}", owner, pictureId);
         final var pictureDir = locationOf(pictureId, owner);
 
         try {
             if (DATASTORE.containsKey(pictureId)) {
                 Belong<Picture> picture = DATASTORE.get(pictureId);
                 DATASTORE.put(pictureId, new Belong<>(owner, picture.getData().toBuilder().state(PictureState.FAILED).build()));
-
+            }
+            if (pictureDir.toFile().exists()) {
+                log.info("{} / Effacement d'image {}", owner, pictureId);
                 try (Stream<Path> dir = walk(pictureDir)) {
-                    dir.sorted(Comparator.reverseOrder())
-                            .map(Path::toFile)
-                            .forEach(File::delete);
+                    dir
+                            .forEach(file -> {
+                                try {
+                                    Files.delete(file);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            });
                 }
             }
         } catch (IOException e) {
