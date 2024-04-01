@@ -7,3 +7,4 @@ node
 data
 .vscode
 platforms/macos/aarch64
+/platforms/windows/x64/jdk-21.0-2.2+13-jre/
