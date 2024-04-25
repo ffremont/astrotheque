@@ -61,7 +61,7 @@ export const ImporationDrawer = ({ open, onClose }: ImportationDrawerProps) => {
                                     {p.state === 'FAILED' && <CloseIcon />}
                                 </ListItemIcon>
 
-                                <ListItemText sx={{ wordBreak: 'break-all' }} primary={`${p.filename}`} />
+                                <ListItemText sx={{ wordBreak: 'break-all', fontSize: '0.8rem' }} primary={`${p.filename}`} />
                             </ListItemButton>
                         </ListItem>)}
 

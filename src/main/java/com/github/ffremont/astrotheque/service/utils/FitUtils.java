@@ -18,9 +18,9 @@ public class FitUtils {
     }
 
     public static FitData analyze(Path fitFile) {
-        BasicHDU<?> hdu = null;
+
         try {
-            hdu = (new Fits(fitFile.toAbsolutePath().toFile())).readHDU();
+            final BasicHDU<?> hdu = (new Fits(fitFile.toAbsolutePath().toFile())).readHDU();
 
             // from fit header or creation file date
             var dateObs = Optional.ofNullable(
@@ -29,24 +29,34 @@ public class FitUtils {
                     .map(LocalDateTime::parse);
             ;
 
-            return FitData.builder()
+            final var exposure = Optional.ofNullable(hdu.getHeader().findCard("EXPOSURE"))
+                    .map(HeaderCard::getValue)
+                    .map(Float::parseFloat)
+                    .orElse(1F);
+
+            var fitBuilder = FitData.builder()
+                    .object(Optional.ofNullable(hdu.getHeader().findCard("OBJECT"))
+                            .map(HeaderCard::getValue)
+                            .orElse(null))
                     .tempFile(fitFile)
                     .gain(Optional.ofNullable(hdu.getHeader().findCard("GAIN")).map(HeaderCard::getValue).map(Integer::valueOf).orElse(null))
-                    .stackCnt(Integer.valueOf(
-                            Optional.ofNullable(hdu.getHeader().findCard("STACKCNT")).map(HeaderCard::getValue).orElse("1"))
-                    )
-                    .dateObs(dateObs.orElse(null))
+                    .dateObs(dateObs.orElse(LocalDateTime.now()))
                     .instrume(Optional.ofNullable(hdu.getHeader().findCard("INSTRUME")).map(HeaderCard::getValue).orElse(""))
-                    .exposure(
-                            Optional.ofNullable(hdu.getHeader().findCard("EXPOSURE"))
-                                    .map(HeaderCard::getValue)
-                                    .map(Float::parseFloat)
-                                    .orElse(1F)
-                    )
+                    .exposure(exposure)
                     .temp(
                             Optional.ofNullable(hdu.getHeader().findCard("CCD-TEMP")).map(HeaderCard::getValue).map(Float::parseFloat).orElse(null)
-                    )
-                    .build();
+                    );
+
+            var stackCnt = Optional.ofNullable(hdu.getHeader().findCard("STACKCNT")).map(HeaderCard::getValue).map(Integer::valueOf);
+            var expTime = Optional.ofNullable(hdu.getHeader().findCard("EXPTIME")).map(HeaderCard::getValue).map(Float::parseFloat);
+
+            expTime.ifPresent(expTimeValue -> {
+                float cnt = expTimeValue / exposure;
+                fitBuilder.stackCnt((int) cnt);
+            });
+            stackCnt.ifPresent(fitBuilder::stackCnt);
+
+            return fitBuilder.build();
         } catch (FitsException | IOException e) {
             throw new RuntimeException(e);
         }

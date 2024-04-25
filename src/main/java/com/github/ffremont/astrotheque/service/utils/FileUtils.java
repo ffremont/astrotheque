@@ -12,5 +12,6 @@ public class FileUtils {
 
     public static final Function<String, String> extensionOf = (String filename) -> filename.substring(filename.lastIndexOf(".") + 1);
     public static final Predicate<String> isImage = (String filename) -> filename.toLowerCase().endsWith(".png") || filename.toLowerCase().endsWith(".jpeg") || filename.toLowerCase().endsWith(".jpg");
+    public static final Predicate<String> isJpeg = (String filename) -> filename.toLowerCase().endsWith(".jpeg") || filename.toLowerCase().endsWith(".jpg");
 
 }

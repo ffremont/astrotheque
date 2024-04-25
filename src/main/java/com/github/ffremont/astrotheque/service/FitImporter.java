@@ -4,6 +4,7 @@ package com.github.ffremont.astrotheque.service
 import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.dao.AstrometryDAO;
 import com.github.ffremont.astrotheque.service.model.*;
+import com.github.ffremont.astrotheque.service.utils.PngToJpegUtils;
 import com.github.ffremont.astrotheque.web.model.Observation;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
@@ -16,8 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static com.github.ffremont.astrotheque.service.utils.FileUtils.isFit;
-import static com.github.ffremont.astrotheque.service.utils.FileUtils.isImage;
+import static com.github.ffremont.astrotheque.service.utils.FileUtils.*;
 
 /**
  * Pour une observation donnée, importe les fits
@@ -83,7 +83,25 @@ public class FitImporter implements Runnable {
             var counter = 0;
 
             var image = Optional.of(file)
+                    .map(f -> isImage.test(f.filename()) ? f : f.relatedTo())
                     .filter(f -> isImage.test(f.filename()))
+                    .map(f -> {
+                        if (!isJpeg.test(f.filename())) {
+                            try {
+                                Path jpg = (new PngToJpegUtils()).apply(f.tempFile());
+
+                                return f.toBuilder()
+                                        .tempFile(jpg)
+                                        .filename(f.filename().substring(0, f.filename().lastIndexOf(".")) + ".jpg").build();
+                            } catch (Exception e) {
+                                log.warn("{} / Convertion JPG de l'image impossible", owner, e);
+                                return null;
+                            }
+                        } else {
+                            return f;
+                        }
+                    })
+                    .filter(Objects::nonNull)
                     .or(() -> Optional.ofNullable(file.relatedTo()));
             var fit = Optional.of(file)
                     .filter(f -> isFit.test(f.filename()))
@@ -187,7 +205,7 @@ public class FitImporter implements Runnable {
                     var celest = deepSkyCatalogService.findCelestObject(tags);
                     var picture = pictureService.get(owner, pictureId).toBuilder()
                             .ra(info.calibration().ra())
-                            .name(celest.map(CelestObject::name).orElse(null))
+                            .name(celest.map(CelestObject::name).orElse(fitData.getObject()))
                             .dec(info.calibration().dec())
                             .camera(fitData.getInstrume())
                             .gain(fitData.getGain())

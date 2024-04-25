@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Builder(toBuilder = true)
 @AllArgsConstructor
@@ -55,7 +56,7 @@ public class Picture implements Comparable<Picture> {
 
     @Override
     public int compareTo(Picture o) {
-        return this.dateObs.compareTo(o.dateObs);
+        return Objects.nonNull(this.dateObs) && Objects.nonNull(o.dateObs) ? this.dateObs.compareTo(o.dateObs) : -1;
     }
 
     @Builder

@@ -17,6 +17,7 @@ public class FitData {
     Path tempFile;
     String filename;
     Integer gain;
+    String object;
     Integer stackCnt;
     LocalDateTime dateObs;
     String instrume;
