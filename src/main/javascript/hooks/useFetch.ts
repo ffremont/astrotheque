@@ -9,7 +9,7 @@ interface FetchMethods {
     patch<T, U>(url: string, body: U): Promise<T>
 }
 
-export const useFetch = (defaultTimeout = 5000): FetchMethods => {
+export const useFetch = (defaultTimeout = 60000): FetchMethods => {
     const call = async <T>(url: string, options: RequestInit) => {
         let status = 0
         try {
