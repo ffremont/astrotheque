@@ -42,15 +42,15 @@ export const Home = () => {
     }, [criteria]);
 
     useEffect(() => {
-
-        if (search && criteria) {
+        console.log('home 1: ', search, criteria);
+        if (search &&  criteria) {
             const myCriteria = allCriteria.find(c => c.name === criteria);
 
             setPicturesInAlbum(fromList(myCriteria?.filter(search.value, donePictures(pictures)) || []))
         } else {
             setPicturesInAlbum(fromList(donePictures(pictures)));
         }
-    }, [search, criteria])
+    }, [search, criteria, pictures])
 
     useEffect(() => {
         myFetch.get<Picture[]>('/api/pictures')
@@ -59,9 +59,6 @@ export const Home = () => {
             });
     }, [state]);
 
-    useEffect(() => {
-        setPicturesInAlbum(fromList(donePictures(pictures)));
-    }, [pictures])
 
 
     return (
