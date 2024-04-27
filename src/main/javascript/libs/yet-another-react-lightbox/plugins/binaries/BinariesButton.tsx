@@ -27,7 +27,6 @@ export function BinariesButton() {
 
   const downloadAnnotated = () => {
     if (currentSlide) {
-      console.log(currentSlide);
       fetch(`/api/pictures/annotated/${currentSlide.imageId}`)
         .then(response => response.blob())
         .then(blob => {

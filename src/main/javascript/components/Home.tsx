@@ -43,7 +43,6 @@ export const Home = () => {
     }, [criteria]);
 
     useEffect(() => {
-        console.log('home 1: ', search, criteria);
         if (search &&  criteria) {
             const myCriteria = allCriteria.find(c => c.name === criteria);
 
