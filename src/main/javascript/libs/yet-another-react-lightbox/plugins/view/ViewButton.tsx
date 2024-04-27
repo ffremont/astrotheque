@@ -1,7 +1,4 @@
-import { useNavigate } from "react-router-dom";
-import { IconButton, createIcon, useController, useLightboxProps, useLightboxState } from "yet-another-react-lightbox";
-import { useAstrotheque } from "../../../../hooks/useAstrotheque";
-import { nanoid } from "nanoid";
+import { IconButton, createIcon, useLightboxState } from "yet-another-react-lightbox";
 
 const ViewIcon = createIcon(
   "ViewIcon",
