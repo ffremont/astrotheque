@@ -26,7 +26,7 @@ export const ProfilDialog = ({ open, onClose }: ProfilDialogProps) => {
     } = useForm<Inputs>({
         shouldUseNativeValidation: true
     });
-    const myFetch = useFetch(15000);
+    const myFetch = useFetch();
     const { setNotification } = useAstrotheque();
 
 

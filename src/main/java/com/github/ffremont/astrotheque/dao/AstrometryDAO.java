@@ -212,7 +212,7 @@ public class AstrometryDAO {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(this.baseurl + "/api/jobs/" + jobId + "/info/"))
-                    .timeout(Duration.ofSeconds(15))
+                    .timeout(Duration.ofSeconds(60))
                     .GET()
                     .build();
 

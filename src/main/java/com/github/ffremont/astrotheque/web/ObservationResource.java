@@ -3,6 +3,12 @@ package com.github.ffremont.astrotheque.web;
 import com.github.ffremont.astrotheque.core.IoC;
 import com.github.ffremont.astrotheque.core.httpserver.route.HttpExchangeWrapper;
 import com.github.ffremont.astrotheque.service.PictureService;
+import com.github.ffremont.astrotheque.service.model.Picture;
+import com.github.ffremont.astrotheque.service.model.PictureState;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ObservationResource {
 
@@ -12,11 +18,20 @@ public class ObservationResource {
         this.pictureService = ioC.get(PictureService.class);
     }
 
-    public String blackList(HttpExchangeWrapper wrapper) {
-        String id = wrapper.pathParams().stream().findFirst().orElseThrow();
 
-        this.pictureService.blackListObservationId(id);
+    public String cancelAll(HttpExchangeWrapper wrapper) {
+        String owner = wrapper.httpExchange().getPrincipal().getUsername();
+        List<Picture> pendingPictures = this.pictureService.getAll(owner).stream()
+                .filter(p -> PictureState.PENDING.equals(p.getState())).toList();
 
-        return null;
+        pendingPictures.stream()
+                .map(Picture::getObservationId)
+                .collect(Collectors.toSet())
+                .forEach(this.pictureService::blackListObservationId);
+
+        new HashSet<>(pendingPictures)
+                .forEach(picture -> this.pictureService.cancel(owner, picture.getId()));
+        
+        return "okay";
     }
 }

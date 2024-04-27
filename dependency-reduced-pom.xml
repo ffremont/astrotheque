@@ -4,7 +4,7 @@
   <groupId>com.github.ffremont</groupId>
   <artifactId>astrotheque</artifactId>
   <name>astrotheque</name>
-  <version>0.2.0</version>
+  <version>0.2.1</version>
   <description>Photothèque en Astronomie Dans le stockage de manière autonome, des photographies astronomiques.</description>
   <build>
     <finalName>${project.name}</finalName>
@@ -51,7 +51,7 @@
               <arguments>
                 <argument>build</argument>
                 <argument>-t</argument>
-                <argument>floorent/astrotheque:${project.version}</argument>
+                <argument>floorent/astrotheque:latest</argument>
                 <argument>.</argument>
               </arguments>
             </configuration>

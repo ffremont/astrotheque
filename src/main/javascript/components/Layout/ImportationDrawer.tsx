@@ -20,7 +20,7 @@ export const ImporationDrawer = ({ open, onClose }: ImportationDrawerProps) => {
     const handleCancelAll = () => {
         const firstPicturePending = recentPictures(pictures).find(picture => picture.state === 'PENDING')
         if (firstPicturePending && window.confirm(`Confirmez-vous l'annulation ?`)) {
-            myFetch.delete(`/api/pictures/observation/${firstPicturePending.observationId}`)
+            myFetch.delete(`/api/pictures/observations/pending`)
                 .then(() => {
                     setNotification({
                         type: 'success',

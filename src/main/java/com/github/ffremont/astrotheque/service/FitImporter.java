@@ -81,35 +81,39 @@ public class FitImporter implements Runnable {
         for (File file : observation.files()) {
             log.info("{} / ->️ Fichier {}", owner, file.filename());
             var counter = 0;
-
-            var image = Optional.of(file)
-                    .map(f -> isImage.test(f.filename()) ? f : f.relatedTo())
-                    .filter(f -> isImage.test(f.filename()))
-                    .map(f -> {
-                        if (!isJpeg.test(f.filename())) {
-                            try {
-                                Path jpg = (new PngToJpegUtils()).apply(f.tempFile());
-
-                                return f.toBuilder()
-                                        .tempFile(jpg)
-                                        .filename(f.filename().substring(0, f.filename().lastIndexOf(".")) + ".jpg").build();
-                            } catch (Exception e) {
-                                log.warn("{} / Convertion JPG de l'image impossible", owner, e);
-                                return null;
-                            }
-                        } else {
-                            return f;
-                        }
-                    })
-                    .filter(Objects::nonNull)
-                    .or(() -> Optional.ofNullable(file.relatedTo()));
-            var fit = Optional.of(file)
-                    .filter(f -> isFit.test(f.filename()))
-                    .or(() -> Optional.ofNullable(file.relatedTo()));
+            String pictureId = null;
+            Optional<File> fit = Optional.empty();
+            Optional<File> image = Optional.empty();
             Optional<File> astrometryFit = Optional.empty();
-
-            var pictureId = file.id();
             try {
+                image = Optional.of(file)
+                        .map(f -> isImage.test(f.filename()) ? f : f.relatedTo())
+                        .filter(f -> isImage.test(f.filename()))
+                        .map(f -> {
+                            if (!isJpeg.test(f.filename())) {
+                                try {
+                                    Path jpg = (new PngToJpegUtils()).apply(f.tempFile());
+
+                                    return f.toBuilder()
+                                            .tempFile(jpg)
+                                            .filename(f.filename().substring(0, f.filename().lastIndexOf(".")) + ".jpg").build();
+                                } catch (Exception e) {
+                                    log.warn("{} / Convertion JPG de l'image impossible", owner, e);
+                                    return null;
+                                }
+                            } else {
+                                return f;
+                            }
+                        })
+                        .filter(Objects::nonNull)
+                        .or(() -> Optional.ofNullable(file.relatedTo()));
+                fit = Optional.of(file)
+                        .filter(f -> isFit.test(f.filename()))
+                        .or(() -> Optional.ofNullable(file.relatedTo()));
+                astrometryFit = Optional.empty();
+
+                pictureId = file.id();
+
                 checkObservation(observation);
 
                 if (Objects.isNull(sessionId)) {

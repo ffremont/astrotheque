@@ -43,7 +43,9 @@ export const allCriteria: Criteria[] = [{
     values: (pictures) => {
         const targets = new Set<string>([]);
         pictures.flatMap(pia => pia.tags).forEach(tag => targets.add(tag));
-        return Array.from(targets).map(loc => ({ label: loc, value: loc }));
+        return Array.from(targets)
+        .map(loc => ({ label: loc, value: loc }))
+        .filter(item => item.label && item.value);
     },
     filter: (search: string, pictures: Picture[]) => pictures.filter(p => p.tags.indexOf(search) > -1)
 }]

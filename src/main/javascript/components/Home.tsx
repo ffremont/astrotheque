@@ -77,7 +77,7 @@ export const Home = () => {
                         name: 'criteria',
                     }}
                 >
-                    {allCriteria.map(c => <option key={c.name} value={c.name}>{c.label}</option>)}
+                    {allCriteria.map((c,i) => <option key={c.name+i} value={c.name}>{c.label}</option>)}
                 </NativeSelect>
                 <Autocomplete
                     fullWidth
