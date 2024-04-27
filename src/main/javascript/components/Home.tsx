@@ -13,13 +13,13 @@ import { Picture } from "../types/Picture";
 import { PictureInAlbum } from "../types/PictureInAlbum";
 import { fromList } from "../utils/pictureInAlbumFactory";
 import { CriteriaNames, allCriteria } from "../types/Criteria";
-import PhotoAlbum from "react-photo-album";
 import { Item } from "../types/Item";
 import { Note } from "../libs/yet-another-react-lightbox/plugins/note/Note";
 import { useAstrotheque } from "../hooks/useAstrotheque";
 import { Binaries } from "../libs/yet-another-react-lightbox/plugins/binaries/Binaries";
 import { Footer } from "./Layout/Footer";
 import { View } from "../libs/yet-another-react-lightbox/plugins/view/View";
+import { PhotoAlbum } from "./Layout/PhotoAlbum";
 
 const donePictures = (pictures: Picture[]) => pictures.filter(p => p.state === 'DONE');
 
@@ -43,7 +43,7 @@ export const Home = () => {
     }, [criteria]);
 
     useEffect(() => {
-        if (search &&  criteria) {
+        if (search && criteria) {
             const myCriteria = allCriteria.find(c => c.name === criteria);
 
             setPicturesInAlbum(fromList(myCriteria?.filter(search.value, donePictures(pictures)) || []))
@@ -59,6 +59,14 @@ export const Home = () => {
             });
     }, [state]);
 
+    const handleClickPhoto = (photo: PictureInAlbum)=> {
+        const index = picturesInAlbum.findIndex(p => p.imageId === photo.imageId);
+        setIndex(index);
+    }
+
+
+    const days = (new Set(picturesInAlbum.map(picture => picture.day)));
+
     return (
         <Box display="flex" flexDirection="column">
             <Box height="2rem" display="flex" flexBasis="content" gap="0.4rem">
@@ -72,7 +80,7 @@ export const Home = () => {
                         name: 'criteria',
                     }}
                 >
-                    {allCriteria.map((c,i) => <option key={c.name+i} value={c.name}>{c.label}</option>)}
+                    {allCriteria.map((c, i) => <option key={c.name + i} value={c.name}>{c.label}</option>)}
                 </NativeSelect>
                 <Autocomplete
                     fullWidth
@@ -101,7 +109,7 @@ export const Home = () => {
             </Box>
             <Box flex="1" sx={{ padding: "1rem 0rem" }}>
 
-                <PhotoAlbum componentsProps={(containerWidth) => ({
+                {/*<PhotoAlbum componentsProps={(containerWidth) => ({
                     imageProps: {
                         loading: (containerWidth || 0) > 600 ? "eager" : "lazy",
                         "style": {
@@ -112,11 +120,18 @@ export const Home = () => {
                     renderPhoto={({ imageProps: { src, alt, style, ...restImageProps } }) => (
                         <img src={src} alt={alt} style={style} {...restImageProps} />
                     )}
-                    photos={picturesInAlbum} layout="rows" targetRowHeight={150} onClick={({ index }) => setIndex(index)} />
+                photos={picturesInAlbum} layout="rows" targetRowHeight={150} onClick={({ index }) => setIndex(index)} />*/}
+
+
+                <div className="album">{
+                    Array.from(days).map(day => 
+                        <PhotoAlbum photos={picturesInAlbum.filter(p => p.day === day)} title={day} onClickPhoto={handleClickPhoto} />
+                    )
+                }
+            </div>
 
                 <Lightbox
                     slides={picturesInAlbum}
-
                     open={index >= 0}
                     index={index}
                     close={() => setIndex(-1)}
@@ -130,6 +145,6 @@ export const Home = () => {
                 </Link>
             </Box>
 
-            <Footer version={import.meta.env.VITE_REACT_APP_VERSION} totalBytes={picturesInAlbum.map(p=> p.data.size ||0).reduce((a,b) => a+b, 0)} totalItems={picturesInAlbum.length} />
+            <Footer version={import.meta.env.VITE_REACT_APP_VERSION} totalBytes={picturesInAlbum.map(p => p.data.size || 0).reduce((a, b) => a + b, 0)} totalItems={picturesInAlbum.length} />
         </Box>)
 }

@@ -54,6 +54,16 @@ export const fromList = (pictures: Picture[]): PictureInAlbum[] => {
             width: 1024,
             href: `/api/pictures/${picture.id}`,
             imageId: picture.id,
+            day: new Intl.DateTimeFormat(
+                'fr-FR',
+                {
+                    dateStyle: 'medium',
+                    timeZone: 'Europe/Paris',
+                }
+            ).format(
+                new Date(picture.dateObs || new Date())
+            )
+            
         }
     })
 }

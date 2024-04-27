@@ -4,4 +4,4 @@ import { Picture } from "./Picture";
 
 
 
-export type PictureInAlbum = Slide & Photo & {data: Picture}
+export type PictureInAlbum = Slide & Photo & {data: Picture} & { day: string}

@@ -13,8 +13,8 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-.app-logo{
-    width:1rem;
+.app-logo {
+    width: 1rem;
     height: 1rem;
 }
 
@@ -49,7 +49,7 @@ body {
     right: 2rem;
 }
 
-form{
+form {
     & .form-intro {
         margin-bottom: 1rem;
     }
@@ -59,42 +59,64 @@ form{
         margin-bottom: 1rem;
         text-align: center;
     }
-    
 
-    &  .form-actions{
+    & .form-actions {
         display: flex;
         gap: 1rem;
         justify-content: center;
     }
 
-    & .form-section{
-       &  .form-control + .form-control{
-            margin:0.5rem 0rem;
+    & .form-section {
+        & .form-control + .form-control {
+            margin: 0.5rem 0rem;
         }
 
-        & .field{
+        & .field {
             text-align: left;
         }
 
-        & .field + .field{
-            margin-top:0.8rem;
+        & .field + .field {
+            margin-top: 0.8rem;
         }
     }
 }
 
-.appFooter{
+.appFooter {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     display: flex;
     justify-content: center;
-    gap:1rem;
+    gap: 1rem;
     background: #353434;
     font-size: 0.9rem;
 }
 
-
-.yarl__slide_description{
+.yarl__slide_description {
     text-align: center;
+}
+
+.album {
+    & .piece-of-album {
+        & h3 {
+            color: #ffffffc9;
+            border-bottom: 3px solid #ffffff5c;
+            text-align: left;
+        }
+    }
+    & .photos {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+
+        img{
+            width:100%;
+        }
+
+        & > div {
+            width: 250px;
+            border-radius: 3px;
+        }
+    }
 }
