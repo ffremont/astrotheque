@@ -97,7 +97,13 @@ public class PictureDAO {
                         try (Stream<Path> streamAccountDataPath = Files.list(accountDataPath)) {
                             streamAccountDataPath
                                     .filter(path -> path.toFile().isDirectory())
-                                    .filter(dir -> !dir.getFileName().toString().startsWith("."))
+                                    .filter(dir ->
+                                            !dir.getFileName().toString().startsWith(".")
+                                                    &&
+                                                    dir.getFileName().toString().contains("-")
+                                                    &&
+                                                    !dir.getFileName().toString().contains("@")
+                                    )
                                     .forEach(pictureDir -> {
                                         var id = pictureDir.getFileName().toString();
                                         try {
