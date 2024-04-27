@@ -107,15 +107,32 @@ form {
     }
     & .photos {
         display: flex;
-        gap: 2rem;
+        gap: 1rem;
         flex-wrap: wrap;
 
-        img{
-            width:100%;
+        img {
+            max-width: 100%;
+            max-height: 300px;
         }
 
         & > div {
-            width: 250px;
+            width: 260px;
+            border-radius: 3px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+}
+
+@media only screen and (max-width: 900px) {
+    .album .photos {
+        flex-direction: column;
+
+        & > div {
+            width: auto;
+            flex: 1;
             border-radius: 3px;
         }
     }

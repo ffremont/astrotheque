@@ -15,7 +15,7 @@ import { BrowserRouter } from 'react-router-dom'
 * @returns {Object.<string, T[]>} An object where keys are the grouping keys
 * and values are arrays of grouped elements.
 */
-window.Object.groupBy ??= function groupBy (iterable: any, callbackfn: any) {
+(window.Object as any).groupBy ??= function groupBy (iterable: any, callbackfn: any) {
  const obj = Object.create(null)
  let i = 0
  for (const value of iterable) {

@@ -1,4 +1,3 @@
-import { Paper } from "@mui/material"
 import { PictureInAlbum } from "../../types/PictureInAlbum";
 
 type PhotoAlbumProps = {
