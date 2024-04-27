@@ -19,6 +19,7 @@ import { Note } from "../libs/yet-another-react-lightbox/plugins/note/Note";
 import { useAstrotheque } from "../hooks/useAstrotheque";
 import { Binaries } from "../libs/yet-another-react-lightbox/plugins/binaries/Binaries";
 import { Footer } from "./Layout/Footer";
+import { View } from "../libs/yet-another-react-lightbox/plugins/view/View";
 
 const donePictures = (pictures: Picture[]) => pictures.filter(p => p.state === 'DONE');
 
@@ -58,8 +59,6 @@ export const Home = () => {
                 setPictures(pictures);
             });
     }, [state]);
-
-
 
     return (
         <Box display="flex" flexDirection="column">
@@ -122,7 +121,7 @@ export const Home = () => {
                     open={index >= 0}
                     index={index}
                     close={() => setIndex(-1)}
-                    plugins={[Captions, Share, Counter, Remove, Edit, Binaries, Note]}
+                    plugins={[Captions, Share, Counter, Remove, Edit, Binaries, Note, View]}
                 />
 
                 <Link to="/importation"><Fab className="fab-add-obs" size="medium" color="secondary" variant="extended">
