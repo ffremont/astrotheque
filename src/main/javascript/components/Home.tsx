@@ -1,5 +1,5 @@
 import { Search } from "@mui/icons-material"
-import { Autocomplete, Fab, InputAdornment, NativeSelect, TextField } from "@mui/material"
+import { Autocomplete, CircularProgress, Fab, InputAdornment, NativeSelect, TextField, Typography } from "@mui/material"
 import { Box } from "@mui/system"
 import { useEffect, useState } from "react";
 import Lightbox from "yet-another-react-lightbox";
@@ -25,6 +25,7 @@ const donePictures = (pictures: Picture[]) => pictures.filter(p => p.state === '
 
 export const Home = () => {
     const [index, setIndex] = useState(-1);
+    const [loading, setLoading] = useState(true);
     const { state } = useLocation();
     const { pictures, setPictures } = useAstrotheque();
     const [picturesInAlbum, setPicturesInAlbum] = useState<(PictureInAlbum)[]>([]);
@@ -53,13 +54,16 @@ export const Home = () => {
     }, [search, criteria, pictures])
 
     useEffect(() => {
+        setLoading(true);
         myFetch.get<Picture[]>('/api/pictures')
             .then(pictures => {
                 setPictures(pictures);
+            }).finally(() => {
+                setLoading(false);
             });
     }, [state]);
 
-    const handleClickPhoto = (photo: PictureInAlbum)=> {
+    const handleClickPhoto = (photo: PictureInAlbum) => {
         const index = picturesInAlbum.findIndex(p => p.imageId === photo.imageId);
         setIndex(index);
     }
@@ -107,28 +111,20 @@ export const Home = () => {
                     )}
                 />
             </Box>
-            <Box flex="1" sx={{ padding: "1rem 0rem" }}>
 
-                {/*<PhotoAlbum componentsProps={(containerWidth) => ({
-                    imageProps: {
-                        loading: (containerWidth || 0) > 600 ? "eager" : "lazy",
-                        "style": {
-                            aspectRatio: "auto"
-                        }
-                    },
-                })}
-                    renderPhoto={({ imageProps: { src, alt, style, ...restImageProps } }) => (
-                        <img src={src} alt={alt} style={style} {...restImageProps} />
-                    )}
-                photos={picturesInAlbum} layout="rows" targetRowHeight={150} onClick={({ index }) => setIndex(index)} />*/}
-
-
+            {loading && <Box sx={{marginTop:'3rem',}}>
+                <CircularProgress />
+                <Typography variant="h1" sx={{ opacity: '0.5', fontFamily: 'Lexend Exa', fontSize: '1.2rem' }} gutterBottom>
+                    chargement des clichés...
+                </Typography>
+            </Box>}
+            {!loading && <Box flex="1" sx={{ padding: "1rem 0rem" }}>
                 <div className="album">{
-                    Array.from(days).map(day => 
-                        <PhotoAlbum photos={picturesInAlbum.filter(p => p.day === day)} title={day} onClickPhoto={handleClickPhoto} />
+                    Array.from(days).map(day =>
+                        <PhotoAlbum key={day} photos={picturesInAlbum.filter(p => p.day === day)} title={day} onClickPhoto={handleClickPhoto} />
                     )
                 }
-            </div>
+                </div>
 
                 <Lightbox
                     slides={picturesInAlbum}
@@ -143,7 +139,9 @@ export const Home = () => {
                     Importer
                 </Fab>
                 </Link>
-            </Box>
+            </Box>}
+
+
 
             <Footer version={import.meta.env.VITE_REACT_APP_VERSION} totalBytes={picturesInAlbum.map(p => p.data.size || 0).reduce((a, b) => a + b, 0)} totalItems={picturesInAlbum.length} />
         </Box>)

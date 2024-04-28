@@ -40,6 +40,7 @@ export const Layout = () => {
                 if (me && me.username) {
                     setUsername(me.username);
                 }
+                navigate('/album')
             })
             .catch(e => {
                 if (e instanceof HttpError && e.status === 401 && !location.pathname.endsWith('/login')) {

@@ -1,4 +1,4 @@
-import { Alert, Avatar, Box, Button, Grid, Link, TextField, Typography } from "@mui/material";
+import { Alert, Avatar, Box, Button, CircularProgress, Grid, Link, TextField, Typography } from "@mui/material";
 import { FormEvent, useState } from "react";
 import { useFetch } from "../hooks/useFetch";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
@@ -11,12 +11,14 @@ type Info = {
 
 export const Login = () => {
     const [error, setError] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [info, setInfo] = useState<Info | null>(null);
     const navigate = useNavigate();
     const myFetch = useFetch();
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setLoading(true);
 
         const formDataEntries = new FormData(e.currentTarget);
 
@@ -29,7 +31,10 @@ export const Login = () => {
             .then(() => {
                 navigate('/');
             })
-            .catch(() => setError(true));
+            .catch(() => setError(true))
+            .finally(() => {
+                setLoading(false);
+            });
     };
 
     const handleClickPwd = () => {
@@ -84,10 +89,12 @@ export const Login = () => {
             <Button
                 type="submit"
                 fullWidth
+                disabled={loading}
                 variant="contained"
+                startIcon={loading && <CircularProgress />}
                 sx={{ mt: 3, mb: 2 }}
             >
-                Se Connecter
+               Se Connecter
             </Button>
             <Grid container>
                 <Grid item xs>

@@ -11,6 +11,7 @@ import { AstrothequeProvider } from './providers/AstrothequeProvider';
 import { Installation } from './components/Installation';
 import { Error } from './components/Error';
 import { PictureForm } from './components/PictureForm';
+import { Initialization } from './components/Initialization';
 
 function App() {
     const myTheme = createTheme(themeOptions);
@@ -19,9 +20,11 @@ function App() {
         (
             <AstrothequeProvider><ThemeProvider theme={myTheme}><Routes>
                 <Route path="/" element={<Layout />}>
-                    <Route index element={<Home />} />
+                    <Route index element={<Initialization />} />
 
+                    <Route path="album" element={<Home />} />
                     <Route path="login" element={<Login />} />
+                    <Route path="initialization" element={<Initialization />} />
                     <Route path="error" element={<Error />} />
                     <Route path="importation" element={<Importation />} />
                     <Route path="photos/:id" element={<PictureForm />} />
