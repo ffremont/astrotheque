@@ -45,6 +45,13 @@ body {
 .yarl__slide_title_container{
     text-align: center;
 }
+.yarl__carousel_with_slides{
+    column-gap: 0;
+}
+
+.yarl__slide yarl__flex_center > div{
+    max-width: calc(100vw - 2rem);
+}
 
 .fab-add-obs {
     position: fixed !important;
