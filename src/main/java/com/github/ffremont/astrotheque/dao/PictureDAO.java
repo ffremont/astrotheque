@@ -97,6 +97,7 @@ public class PictureDAO {
                         try (Stream<Path> streamAccountDataPath = Files.list(accountDataPath)) {
                             streamAccountDataPath
                                     .filter(path -> path.toFile().isDirectory())
+                                    .filter(path -> Objects.requireNonNull(path.toFile().list()).length > 0)
                                     .filter(dir ->
                                             !dir.getFileName().toString().startsWith(".")
                                                     &&

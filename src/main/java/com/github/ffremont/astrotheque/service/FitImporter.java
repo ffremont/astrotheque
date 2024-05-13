@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.*;
 
 import static com.github.ffremont.astrotheque.service.utils.FileUtils.*;
@@ -160,9 +161,21 @@ public class FitImporter implements Runnable {
                     if (fit.isPresent()) {
                         log.info("{} / ⬇ download astrometry fit (new-fit)", owner);
                         Path newAstrometryFit = Files.createTempFile("astrotheque_astrometry_new_", ".fit");
-                        FileUtils.copyInputStreamToFile(astrometryDAO.getFit(jobId.get()), newAstrometryFit.toFile());
-                        astrometryFit = Optional.of(new File(UUID.randomUUID().toString(), newAstrometryFit, newAstrometryFit.toFile().getName(), fit.get()));
-                        log.info("{} / ✅ downloaded astrometry fit (new-fit)", owner);
+                        var newFitTry = 0;
+                        while (newFitTry < 10) {
+                            newFitTry++;
+
+                            try {
+                                FileUtils.copyInputStreamToFile(astrometryDAO.getFit(jobId.get()), newAstrometryFit.toFile());
+                                astrometryFit = Optional.of(new File(UUID.randomUUID().toString(), newAstrometryFit, newAstrometryFit.toFile().getName(), fit.get()));
+                                break;
+                            } catch (IOException io) {
+                                log.warn("{} / ❌ téléchargement impossible du new-fit, retentative...", owner);
+                                Thread.sleep(Duration.ofSeconds(20));
+                            }
+                        }
+
+                        astrometryFit.ifPresent((a) -> log.info("{} / ✅ downloaded astrometry fit (new-fit)", owner));
                     }
 
                     var thumbnail = new ByteArrayOutputStream();
