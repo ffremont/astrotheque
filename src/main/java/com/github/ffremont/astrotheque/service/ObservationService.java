@@ -23,18 +23,14 @@ import static com.github.ffremont.astrotheque.service.utils.FileUtils.isImage;
 
 @Slf4j
 public class ObservationService {
-
-
-    private final FitMapper fitMapper = new FitMapper();
+    
     private static final ExecutorService FIT_IMPORT_THREAD_POOL = Executors.newFixedThreadPool(1);
     private final IoC ioc;
     private final PictureService pictureService;
-    private final MoonService moonService;
 
 
     public ObservationService(IoC ioC) {
         this.pictureService = ioC.get(PictureService.class);
-        this.moonService = ioC.get(MoonService.class);
         this.ioc = ioC;
     }
 
@@ -53,9 +49,9 @@ public class ObservationService {
             var image = Optional.of(file)
                     .filter(f -> isImage.test(f.filename()))
                     .or(() -> Optional.ofNullable(file.relatedTo())).orElseThrow();
-            var fit = Optional.of(file)
+            var perhapsFit = Optional.of(file)
                     .filter(f -> isFit.test(f.filename()))
-                    .or(() -> Optional.ofNullable(file.relatedTo())).orElseThrow();
+                    .or(() -> Optional.ofNullable(file.relatedTo()));
 
             var thumbnail = new ByteArrayOutputStream();
             try {
@@ -72,6 +68,7 @@ public class ObservationService {
                         .filename(file.filename())
                         .imported(LocalDateTime.now())
                         .instrument(observation.instrument())
+                        .dateObs(LocalDateTime.now()) // by default
                         .tags(planetSatellite.isPresent() ? List.of(observation.planetSatellite().name()) : Collections.emptyList())
                         .state(PictureState.DONE)
                         .weather(observation.weather())
@@ -82,7 +79,7 @@ public class ObservationService {
 
                 pictureService.save(accountName, picture, Files.newInputStream(image.tempFile()),
                         new ByteArrayInputStream(thumbnail.toByteArray()),
-                        Files.newInputStream(fit.tempFile()), null,
+                        perhapsFit.isPresent() ? Files.newInputStream(perhapsFit.get().tempFile()) : null, null,
                         null
                 );
 

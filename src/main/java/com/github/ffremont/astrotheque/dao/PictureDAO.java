@@ -187,7 +187,10 @@ public class PictureDAO {
             }
 
             Files.copy(jpg, pictureDir.resolve(PICTURE_FILENAME));
-            Files.copy(raw, pictureDir.resolve(RAW_FILENAME));
+            if (Objects.nonNull(raw)) {
+                Files.copy(raw, pictureDir.resolve(RAW_FILENAME));
+            }
+
             if (Objects.nonNull(astrometryRaw)) {
                 Files.copy(astrometryRaw, pictureDir.resolve(ASTROMMETRY_RAW_FILENAME));
             }
