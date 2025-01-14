@@ -33,16 +33,20 @@ public class FitUtils {
                     .map(HeaderCard::getValue)
                     .map(Float::parseFloat)
                     .orElse(1F);
+            final var exptime = Optional.ofNullable(hdu.getHeader().findCard("EXPTIME"))
+                    .map(HeaderCard::getValue)
+                    .map(Float::parseFloat)
+                    .orElse(exposure);
 
             var fitBuilder = FitData.builder()
                     .object(Optional.ofNullable(hdu.getHeader().findCard("OBJECT"))
                             .map(HeaderCard::getValue)
                             .orElse(null))
                     .tempFile(fitFile)
-                    .gain(Optional.ofNullable(hdu.getHeader().findCard("GAIN")).map(HeaderCard::getValue).map(Integer::valueOf).orElse(null))
+                    .gain(Optional.ofNullable(hdu.getHeader().findCard("GAIN")).map(HeaderCard::getValue).map(Double::valueOf).map(Double::intValue).orElse(null))
                     .dateObs(dateObs.orElse(LocalDateTime.now()))
                     .instrume(Optional.ofNullable(hdu.getHeader().findCard("INSTRUME")).map(HeaderCard::getValue).orElse(""))
-                    .exposure(exposure)
+                    .exposure(exptime)
                     .temp(
                             Optional.ofNullable(hdu.getHeader().findCard("CCD-TEMP")).map(HeaderCard::getValue).map(Float::parseFloat).orElse(null)
                     );
@@ -51,7 +55,7 @@ public class FitUtils {
             var expTime = Optional.ofNullable(hdu.getHeader().findCard("EXPTIME")).map(HeaderCard::getValue).map(Float::parseFloat);
 
             expTime.ifPresent(expTimeValue -> {
-                float cnt = expTimeValue / exposure;
+                float cnt = expTimeValue / exptime;
                 fitBuilder.stackCnt((int) cnt);
             });
             stackCnt.ifPresent(fitBuilder::stackCnt);
